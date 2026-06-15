@@ -56,18 +56,6 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;
 .hdr-logo-name span{color:rgba(255,255,255,.85);font-weight:700;}
 .hdr-div{width:1px;height:20px;background:rgba(255,255,255,.15);flex-shrink:0;}
 .hdr-prod{color:rgba(255,255,255,.55);font-size:12px;font-weight:500;white-space:nowrap;}
-.hdr-tabs{display:flex;align-items:stretch;flex:1;height:100%;overflow:hidden;margin-left:var(--sp-2);}
-.hdr-tab{display:flex;align-items:center;gap:var(--sp-1);padding:0 var(--sp-3);
-  color:rgba(255,255,255,.5);font-size:12px;font-weight:500;cursor:pointer;
-  border-bottom:2px solid transparent;white-space:nowrap;transition:all .18s;
-  border-right:1px solid rgba(255,255,255,.06);}
-.hdr-tab:hover{color:rgba(255,255,255,.8);}
-.hdr-tab.active{color:var(--neutral-0);border-bottom-color:var(--primary-300);}
-.hdr-tab .tc{opacity:0;font-size:9px;margin-left:4px;transition:opacity .15s;}
-.hdr-tab:hover .tc{opacity:.5;}
-.hdr-tab-add{display:flex;align-items:center;padding:0 var(--sp-3);
-  color:rgba(255,255,255,.3);cursor:pointer;font-size:13px;transition:color .15s;}
-.hdr-tab-add:hover{color:rgba(255,255,255,.6);}
 .hdr-right{margin-left:auto;display:flex;align-items:center;gap:var(--sp-3);flex-shrink:0;}
 .hdr-bell{color:rgba(255,255,255,.5);font-size:14px;position:relative;cursor:pointer;padding:4px;}
 .hdr-bell:hover{color:var(--neutral-0);}
@@ -360,7 +348,6 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;
   </div>
   <div class="hdr-div"></div>
   <span class="hdr-prod">Agent Workspace</span>
-  <div class="hdr-tabs" id="hdr-tabs"></div>
   <div class="hdr-right">
     <div class="hdr-bell"><i class="fas fa-bell"></i><div class="hdr-bell-dot"></div></div>
     <div class="in-call" id="in-call">
@@ -3127,17 +3114,6 @@ function selectCase(key){
 }
 
 function renderHdrTabs(c){
-  document.getElementById('hdr-tabs').innerHTML=`
-    <div class="hdr-tab active">
-      <i class="fas fa-user" style="font-size:10px"></i>${c.name}<span class="tc">✕</span>
-    </div>
-    <div class="hdr-tab${curTab==='voice'?' active':''}" onclick="switchTab('voice')">
-      <i class="fas fa-phone" style="font-size:10px"></i>Voice
-    </div>
-    <div class="hdr-tab${curTab==='history'?' active':''}" onclick="switchTab('history')">
-      <i class="fas fa-route" style="font-size:10px"></i>Customer History
-    </div>
-    <div class="hdr-tab-add"><i class="fas fa-plus"></i></div>`;
   document.getElementById('hdr-av').textContent=c.init;
   document.getElementById('tr-name').textContent=c.name;
 }
