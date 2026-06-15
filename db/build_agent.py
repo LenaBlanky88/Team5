@@ -400,28 +400,18 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 .pri-medium{background:#fffde7;color:#795b00;}
 .act-txt{font-size:12px;line-height:1.5;color:var(--n700);}
 
-/* ── TRANSCRIPT PANEL ── */
-.tr-panel{width:var(--tr-w);background:var(--n0);border-left:1px solid var(--n100);
-  display:flex;flex-direction:column;flex-shrink:0;}
-.tr-hdr{padding:8px 12px;background:var(--p500);
-  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.tr-hdr-left .tr-lbl{font-size:9px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.08em;color:rgba(255,255,255,.5);}
-.tr-hdr-left .tr-name{font-size:12px;font-weight:600;color:#fff;margin-top:1px;}
-.tr-live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#6ee2a0;}
-.tr-live-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:pulse 1.5s infinite;}
-.tr-body{flex:1;overflow-y:auto;padding:12px 10px;}
-.bubble{margin-bottom:8px;}
-.bubble-sp{font-size:9px;font-weight:700;color:var(--n300);margin-bottom:2px;
+/* ── CHAT BUBBLES (used in drawer) ── */
+.bubble{margin-bottom:10px;}
+.bubble-sp{font-size:9px;font-weight:700;color:var(--n300);margin-bottom:3px;
   text-transform:uppercase;letter-spacing:.05em;}
-.bubble-txt{padding:8px 11px;border-radius:var(--r-md);font-size:11px;
-  line-height:1.6;max-width:92%;white-space:pre-line;}
-.b-cust .bubble-sp{color:var(--p400);}
-.b-cust .bubble-txt{background:var(--p50);color:var(--n700);}
+.bubble-txt{display:inline-block;padding:8px 12px;border-radius:var(--r-md);font-size:12px;
+  line-height:1.6;max-width:90%;white-space:pre-line;}
+.b-cust .bubble-sp{color:var(--p500);}
+.b-cust .bubble-txt{background:var(--p50);color:var(--n700);border:1px solid var(--p100);}
 .b-agent .bubble-sp{color:var(--n400);}
-.b-agent .bubble-txt{background:var(--n50);color:var(--n700);}
+.b-agent .bubble-txt{background:var(--n50);color:var(--n700);border:1px solid var(--n100);}
 .b-sys .bubble-sp{color:var(--ok);}
-.b-sys .bubble-txt{background:var(--ok-bg);color:#155724;font-style:italic;font-size:10px;}
+.b-sys .bubble-txt{background:var(--ok-bg);color:#155724;font-style:italic;font-size:11px;border:1px solid var(--ok-bd);}
 
 /* ── DRAWER ── */
 .overlay{position:fixed;inset:0;background:rgba(17,24,39,.3);z-index:200;
@@ -508,17 +498,6 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
     <div class="tab-content" id="tab-content"></div>
   </div>
 
-  <!-- TRANSCRIPT -->
-  <div class="tr-panel">
-    <div class="tr-hdr">
-      <div class="tr-hdr-left">
-        <div class="tr-lbl">Call Transcript</div>
-        <div class="tr-name" id="tr-name">—</div>
-      </div>
-      <div class="tr-live"><div class="tr-live-dot"></div>LIVE</div>
-    </div>
-    <div class="tr-body" id="tr-body"></div>
-  </div>
 </div>
 
 <!-- DRAWER -->
@@ -563,9 +542,7 @@ function selectCase(key){
   curKey=key; curTab='voice'; closeDrawer();
   const c=CASES.find(x=>x.key===key); if(!c) return;
   document.getElementById('hdr-av').textContent=c.init;
-  document.getElementById('tr-name').textContent=c.name;
   renderCallCard(c);
-  renderTranscript(c);
   renderVoiceTab(c);
 }
 
@@ -596,7 +573,7 @@ function renderTabBar(activeTab){
       <i class="fas fa-phone"></i>Voice
     </div>
     <div class="m-tab${activeTab==='history'?' active':''}" onclick="switchTab('history')">
-      <i class="fas fa-route"></i>Customer History
+      <i class="fas fa-route"></i>Customer Journey
     </div>`;
 }
 
@@ -718,15 +695,6 @@ function renderHistoryTab(c){
     const fg=document.getElementById('score-fg');
     if(fg){fg.style.strokeDasharray=circ;fg.style.strokeDashoffset=offset;}
   });
-}
-
-/* ── transcript ── */
-function renderTranscript(c){
-  document.getElementById('tr-name').textContent=c.name;
-  document.getElementById('tr-body').innerHTML=c.transcript.map(l=>{
-    const cls=l.sp==='cust'?'b-cust':l.sp==='sys'?'b-sys':'b-agent';
-    return `<div class="bubble ${cls}"><div class="bubble-sp">${l.nm}</div><div class="bubble-txt">${l.tx}</div></div>`;
-  }).join('');
 }
 
 /* ── drawer ── */
