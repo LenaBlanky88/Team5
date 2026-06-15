@@ -1,14 +1,15 @@
 """
 build_workspace.py
-Reads customer_journey_forensics.db and writes agent-workspace.html
+Reads customer_journey_forensics.db → writes agent-workspace.html
+Styled with C26 / Cognigy design system (NICE canonical tokens)
 Run from project root: python3 db/build_workspace.py
 """
 import sqlite3, json, os, sys, re
 
 DB_PATH  = "customer_journey_forensics.db"
 OUT_FILE = "agent-workspace.html"
+LOGO_SVG = "blue_smile.svg"
 
-# ── channel / sentiment helpers ──────────────────────────────────────────────
 CH_ICON = {
     "Phone Call":"📞","Email":"📧","Chatbot":"🤖","Live Chat":"💬",
     "WhatsApp":"💬","Callback":"📲","Portal / Self-Service":"🖥️",
@@ -20,577 +21,522 @@ CH_KEY = {
     "Portal / Self-Service":"portal","Social Media":"social",
     "Mobile App":"mobile","Automated Notification":"auto",
 }
-SENT_EMOJI = {
-    "Neutral":"😐","Slightly Negative":"😕","Negative":"😞",
-    "Very Negative":"😡","Positive":"😊",
-}
-SENT_KEY = {
-    "Neutral":"neutral","Slightly Negative":"slightly-neg",
-    "Negative":"neg","Very Negative":"very-neg","Positive":"pos",
-}
-INDUSTRY_EMOJI = {"Insurance":"📋","Healthcare":"🏥","Banking":"🏦","ISP":"📡"}
-RISK_COL = lambda s: "#DC3545" if s>=9 else ("#FD7E14" if s>=7.5 else "#FFC107")
+SENT_EMOJI = {"Neutral":"😐","Slightly Negative":"😕","Negative":"😞","Very Negative":"😡","Positive":"😊"}
+SENT_KEY   = {"Neutral":"neutral","Slightly Negative":"slightly-neg","Negative":"neg","Very Negative":"very-neg","Positive":"pos"}
+IND_EMOJI  = {"Insurance":"📋","Healthcare":"🏥","Banking":"🏦","ISP":"📡"}
 
 def initials(n):
-    p = n.split()
-    return (p[0][0]+p[-1][0]).upper() if len(p)>=2 else n[:2].upper()
+    p=n.split(); return (p[0][0]+p[-1][0]).upper() if len(p)>=2 else n[:2].upper()
 
-def fmt_dur(secs):
-    if not secs: return None
-    m,s = divmod(secs,60)
-    return f"{m} min" + (f" {s}s" if s else "")
+def fmt_dur(s):
+    if not s: return None
+    m,sec=divmod(s,60); return f"{m} min" + (f" {sec}s" if sec else "")
+
+def risk_col(s):
+    return "#e32926" if s>=9 else ("#ffb800" if s>=7.5 else "#208337")
 
 def parse_transcript(raw):
-    if not raw:
-        return [{"sp":"sys","nm":"System","tx":"No transcript available."}]
-    lines = [l.strip() for l in raw.strip().split("\n") if l.strip()]
-    out = []
-    for line in lines:
+    if not raw: return [{"sp":"sys","nm":"System","tx":"No transcript available."}]
+    out=[]
+    for line in [l.strip() for l in raw.strip().split("\n") if l.strip()]:
         if ":" in line:
-            spk, _, txt = line.partition(":")
-            spk, txt = spk.strip(), txt.strip()
+            spk,_,txt=line.partition(":"); spk,txt=spk.strip(),txt.strip()
             if not txt: continue
-            lo = spk.lower()
-            if any(w in lo for w in ["bot","system","ivr","portal","auto","notification"]):
-                role = "sys"
-            elif any(w in lo for w in [
-                "customer","michael","james","david","jennifer","robert",
-                "emily","sarah","anna","lisa","elena","terry"]):
-                role = "cust"
-            else:
-                role = "agent"
+            lo=spk.lower()
+            if any(w in lo for w in ["bot","system","ivr","portal","auto","notification"]): role="sys"
+            elif any(w in lo for w in ["customer","michael","james","david","jennifer","robert","emily","sarah","anna","lisa","elena","terry"]): role="cust"
+            else: role="agent"
             out.append({"sp":role,"nm":spk,"tx":txt})
         else:
             out.append({"sp":"sys","nm":"System","tx":line})
     return out or [{"sp":"sys","nm":"System","tx":raw[:200]}]
 
-# ── AI opening lines from failure patterns ───────────────────────────────────
 OPENER_MAP = {
-    "Ownership Gap":
-        ("I can see this case has been waiting for a resolution — I'm personally taking ownership right now.",
-         "establishes accountability immediately"),
-    "Broken Promise":
-        ("I understand a commitment was made that wasn't kept. Can you walk me through exactly what you were told?",
-         "surfaces the broken promise — lets customer vent and clarifies the gap"),
-    "Repeat Contact":
-        ("I can see you've reached out to us multiple times on this — that's not acceptable and I want to fix it today.",
-         "acknowledges the effort and frustration before anything else"),
-    "Financial Impact":
-        ("I can see there was a billing impact on your account. Let me pull that up first before we do anything else.",
-         "addresses financial pain point immediately — high retention risk"),
-    "SLA Breach":
-        ("Your case has exceeded our response SLA. I'm escalating priority right now.",
-         "shows urgency and accountability for the delay"),
-    "Channel Switching":
-        ("You've had to reach us across several different channels — I want to be your single point of contact today.",
-         "reduces customer effort, builds trust"),
-    "No Assessor Assigned":
-        ("I can see your claim is still pending an assessor. Let me check the assignment queue right now.",
-         "shows immediate action on the root blocker"),
-    "Conflicting Information":
-        ("I understand you received different information from different people. Let me give you one confirmed answer.",
-         "resolves confusion — one voice, one truth"),
-    "No Proactive Communication":
-        ("I can see no update was sent to you while this was being processed. That should not have happened.",
-         "proactive acknowledgement of the silence"),
-    "Treatment Delay":
-        ("I understand there is a health-related urgency here. I'm flagging this as clinical priority immediately.",
-         "signals urgency — critical for healthcare cases"),
-    "Escalation Spiral":
-        ("I can see this has been escalated multiple times. I'm the right person to resolve this today — no more transfers.",
-         "stops the escalation loop, builds confidence"),
-    "Billing Impact":
-        ("I can see there was a billing concern on your account — let me check that immediately.",
-         "addresses financial pain point"),
-    "No Proactive Alert":
-        ("I notice you weren't alerted before this issue occurred. Let me make sure you have full visibility going forward.",
-         "turns reactive into proactive"),
-    "Recurring Issue":
-        ("I can see this issue has come back more than once. Let me make sure we get to the actual root cause today.",
-         "signals intent to fix permanently, not just patch"),
+    "Ownership Gap":       ("I can see this case has been waiting — I'm personally taking ownership right now.",        "establishes accountability immediately"),
+    "Broken Promise":      ("A commitment was made that wasn't kept. Can you walk me through what you were told?",      "surfaces the broken promise — gives customer space to explain"),
+    "Repeat Contact":      ("I can see you've had to contact us multiple times on this — that shouldn't happen.",       "acknowledges effort before offering a solution"),
+    "Financial Impact":    ("I can see there was a billing impact on your account. Let me pull that up first.",         "addresses financial pain point immediately"),
+    "SLA Breach":          ("Your case has exceeded our response SLA. I'm escalating priority right now.",             "signals urgency and accountability"),
+    "Channel Switching":   ("You've reached us across several channels — I want to be your single point of contact.",   "reduces customer effort, builds trust"),
+    "No Assessor Assigned":("Your claim is still pending an assessor. Let me check the assignment queue right now.",    "shows immediate action on the root blocker"),
+    "Conflicting Information":("You received different information from different agents. Let me give you one confirmed answer.","resolves confusion with one authoritative voice"),
+    "Treatment Delay":     ("I understand there is a health-related urgency here. I'm flagging this as clinical priority.", "critical signal for healthcare cases"),
+    "Escalation Spiral":   ("This has been escalated multiple times. I'm the right person to resolve it today — no more transfers.", "stops the loop, builds confidence"),
+    "No Proactive Communication":("I can see no update was sent while this was being processed — that should not have happened.","proactive acknowledgement of the silence"),
+    "Billing Impact":      ("There was a billing concern on your account — let me check that immediately.",              "addresses financial pain point"),
 }
 
-def get_opening_lines(patterns):
-    lines = []
-    seen = set()
+def opening_lines(patterns):
+    out,seen=[],set()
     for p in patterns:
-        pt = p["pattern_type"]
+        pt=p["pattern_type"]
         if pt in OPENER_MAP and pt not in seen:
-            q, hint = OPENER_MAP[pt]
-            lines.append({"q": q, "hint": hint, "pattern": pt})
-            seen.add(pt)
-        if len(lines) == 3:
-            break
-    # fallback if DB patterns not in map
-    if not lines:
-        lines = [
-            {"q":"What would be the ideal outcome of today's call for you?",
-             "hint":"open-ended — lets customer define success"},
-            {"q":"Can you walk me through what's happened so far?",
-             "hint":"gives full context before offering a solution"},
-        ]
-    return lines[:3]
+            q,h=OPENER_MAP[pt]; out.append({"q":q,"hint":h,"pattern":pt}); seen.add(pt)
+        if len(out)==3: break
+    if not out:
+        out=[{"q":"What would be the ideal outcome of this call for you?","hint":"open-ended — lets customer define success","pattern":""},
+             {"q":"Can you walk me through what's happened so far?","hint":"full context before any solution","pattern":""}]
+    return out[:3]
 
-# ── customer snapshot bullets ─────────────────────────────────────────────────
-def build_snapshot(s, ints, patterns):
-    crit = sum(1 for p in patterns if p["severity"]=="CRITICAL")
-    last_ch = ints[-1]["channel_name"] if ints else "Unknown"
-    first_dt = str(ints[0]["start_time"])[:10] if ints else "Unknown"
-    bullets = [
+def snapshot_bullets(s,ints,fps):
+    crit=sum(1 for p in fps if p["severity"]=="CRITICAL")
+    last_ch=ints[-1]["channel_name"] if ints else "Unknown"
+    first_dt=str(ints[0]["start_time"])[:10] if ints else "Unknown"
+    return [
         f"{s['industry']} customer — {s['plan_type'] or 'Standard plan'} · {s['customer_id']}",
-        f"{s['total_interactions']} prior contacts since {first_dt} — case still unresolved",
-        f"{crit} critical failure pattern{'s' if crit!=1 else ''} detected · Risk score {s['risk_score']} {s['risk_label']}",
-        f"Last contact via {last_ch} — {SENT_EMOJI.get(ints[-1]['overall_sentiment'],'😐')} {ints[-1]['overall_sentiment'] or 'Unknown'} sentiment",
+        f"{s['total_interactions']} prior contacts since {first_dt} — case unresolved",
+        f"{crit} critical failure pattern{'s' if crit!=1 else ''} · Risk {s['risk_score']} {s['risk_label']}",
+        f"Last contact via {last_ch} · {SENT_EMOJI.get(ints[-1]['overall_sentiment'],'😐')} {ints[-1]['overall_sentiment'] or 'Unknown'} sentiment",
     ]
-    return bullets
 
-# ── internal note ─────────────────────────────────────────────────────────────
-def build_internal_note(s, ints, c):
-    n = len(ints)
-    last = ints[-1] if ints else {}
-    ch = last.get("channel_name","phone")
-    return (
-        f"{c['customer_name']} has contacted {s['industry']} support "
-        f"{n} time{'s' if n!=1 else ''} regarding: <strong>{s['scenario_title']}</strong>. "
-        f"Current risk score: <strong>{s['risk_score']} / 10 — {s['risk_label']}</strong>. "
-        f"Most recent contact via <strong>{ch}</strong>. "
-        f"Root cause: {(s['root_cause'] or 'Under analysis')[:160]}."
-    )
+def internal_note(s,ints):
+    last=ints[-1]; ch=last.get("channel_name","phone"); n=len(ints)
+    return (f"{s['customer_name']} has contacted {s['industry']} support "
+            f"<strong>{n} time{'s' if n!=1 else ''}</strong> regarding: "
+            f"<strong>{s['scenario_title']}</strong>. "
+            f"Current risk score: <strong>{s['risk_score']} / 10 — {s['risk_label']}</strong>. "
+            f"Most recent contact via <strong>{ch}</strong>. "
+            f"{(s['root_cause'] or '')[:180]}.")
 
-# ── main build ────────────────────────────────────────────────────────────────
 def build():
-    if not os.path.exists(DB_PATH):
-        print(f"ERROR: {DB_PATH} not found. Run db/seed.py first."); sys.exit(1)
+    if not os.path.exists(DB_PATH): print(f"ERROR: {DB_PATH} not found."); sys.exit(1)
 
-    db = sqlite3.connect(DB_PATH)
-    db.row_factory = sqlite3.Row
+    # Load logo SVG inline
+    logo_svg = ""
+    if os.path.exists(LOGO_SVG):
+        with open(LOGO_SVG) as f: logo_svg = f.read().strip()
 
-    sessions = db.execute("""
-        SELECT js.master_contact_id, js.scenario_title, js.case_reference_id,
-               js.industry, js.risk_score, js.risk_label, js.total_interactions,
-               js.root_cause, js.session_status,
-               c.customer_name, c.customer_id, c.plan_type,
-               c.account_number, c.member_id, c.policy_number
-        FROM journey_sessions js JOIN customers c ON js.customer_id = c.customer_id
+    db=sqlite3.connect(DB_PATH); db.row_factory=sqlite3.Row
+    sessions=db.execute("""
+        SELECT js.*,c.customer_name,c.customer_id as cust_id,c.plan_type,
+               c.account_number,c.member_id,c.policy_number
+        FROM journey_sessions js JOIN customers c ON js.customer_id=c.customer_id
         ORDER BY js.risk_score DESC
     """).fetchall()
 
-    cases = []
+    cases=[]
     for s in sessions:
-        key = s["master_contact_id"]
-        ints_raw = db.execute("""
-            SELECT i.*, ch.channel_name, a.agent_name
+        key=s["master_contact_id"]
+        ints_r=db.execute("""
+            SELECT i.*,ch.channel_name,a.agent_name
             FROM interactions i
-            LEFT JOIN channels ch ON i.channel_id = ch.channel_id
-            LEFT JOIN agents a ON i.agent_id = a.agent_id
+            LEFT JOIN channels ch ON i.channel_id=ch.channel_id
+            LEFT JOIN agents a ON i.agent_id=a.agent_id
             WHERE i.master_contact_id=? ORDER BY i.interaction_sequence
-        """, (key,)).fetchall()
-        if not ints_raw: continue
+        """,(key,)).fetchall()
+        if not ints_r: continue
+        fps_r=db.execute("SELECT severity,pattern_type,pattern_description FROM failure_patterns WHERE master_contact_id=? ORDER BY CASE severity WHEN 'CRITICAL' THEN 1 ELSE 2 END",(key,)).fetchall()
+        acts_r=db.execute("SELECT priority,action_text FROM recommended_actions WHERE master_contact_id=? ORDER BY CASE priority WHEN 'Critical' THEN 1 WHEN 'High' THEN 2 WHEN 'Medium' THEN 3 ELSE 4 END",(key,)).fetchall()
+        ints=[dict(i) for i in ints_r]; fps=[dict(f) for f in fps_r]; acts=[dict(a) for a in acts_r]
 
-        fps_raw = db.execute("""
-            SELECT severity, pattern_type, pattern_description
-            FROM failure_patterns WHERE master_contact_id=?
-            ORDER BY CASE severity WHEN 'CRITICAL' THEN 1 ELSE 2 END
-        """, (key,)).fetchall()
-
-        acts_raw = db.execute("""
-            SELECT priority, action_text FROM recommended_actions
-            WHERE master_contact_id=?
-            ORDER BY CASE priority WHEN 'Critical' THEN 1 WHEN 'High' THEN 2
-                     WHEN 'Medium' THEN 3 ELSE 4 END
-        """, (key,)).fetchall()
-
-        ints  = [dict(i) for i in ints_raw]
-        fps   = [dict(f) for f in fps_raw]
-        acts  = [dict(a) for a in acts_raw]
-
-        # transcript = last interaction (current call)
-        last_int = ints[-1]
-        transcript_bubbles = parse_transcript(last_int.get("transcript",""))
-
-        # journey nodes for Customer History tab
-        nodes = []
+        nodes=[]
         for it in ints:
-            ch_name = it.get("channel_name") or it.get("media_type","")
-            sent_raw = it.get("overall_sentiment") or "Neutral"
-            nodes.append({
-                "seq":   it["interaction_sequence"],
-                "ch":    CH_KEY.get(ch_name,"voice"),
-                "icon":  CH_ICON.get(ch_name,"📋"),
-                "chNm":  ch_name,
-                "ttl":   f"{ch_name} — Contact {it['interaction_sequence']}",
-                "dt":    str(it.get("start_time",""))[:10],
-                "ag":    it.get("agent_name") or "Unassigned",
-                "sent":  SENT_KEY.get(sent_raw,"neutral"),
-                "sEmoji":SENT_EMOJI.get(sent_raw,"😐"),
-                "csat":  it.get("csat"),
-                "esc":   bool(it.get("escalation_flag")),
-                "dur":   fmt_dur(it.get("duration_seconds")),
-                "lines": parse_transcript(it.get("transcript","")),
-                "out":   it.get("outcome") or "—",
-            })
+            ch_n=it.get("channel_name") or it.get("media_type","")
+            sr=it.get("overall_sentiment") or "Neutral"
+            nodes.append({"seq":it["interaction_sequence"],"ch":CH_KEY.get(ch_n,"voice"),
+                "icon":CH_ICON.get(ch_n,"📋"),"chNm":ch_n,"ttl":f"{ch_n} — Contact {it['interaction_sequence']}",
+                "dt":str(it.get("start_time",""))[:10],"ag":it.get("agent_name") or "Unassigned",
+                "sent":SENT_KEY.get(sr,"neutral"),"sEmoji":SENT_EMOJI.get(sr,"😐"),
+                "csat":it.get("csat"),"esc":bool(it.get("escalation_flag")),
+                "dur":fmt_dur(it.get("duration_seconds")),
+                "lines":parse_transcript(it.get("transcript","")),
+                "out":it.get("outcome") or "—"})
 
-        pat_list = [
-            {"sev":"🔴" if p["severity"]=="CRITICAL" else "🟠",
-             "lbl": p["pattern_type"],
-             "desc":p["pattern_description"]}
-            for p in fps
-        ]
-        act_list = [{"pri":a["priority"],"txt":a["action_text"]} for a in acts]
-
-        ref = (s["case_reference_id"] or s["policy_number"] or
-               s["account_number"] or s["member_id"] or "N/A")
-        score = float(s["risk_score"]) if s["risk_score"] else 7.0
-
-        opening_lines = get_opening_lines(fps)
-        snapshot_bullets = build_snapshot(dict(s), ints, fps)
-        internal_note = build_internal_note(dict(s), ints, dict(s))
-
+        score=float(s["risk_score"]) if s["risk_score"] else 7.0
+        ref=s["case_reference_id"] or s["policy_number"] or s["account_number"] or s["member_id"] or "N/A"
         cases.append({
-            "key":      key,
-            "name":     s["customer_name"],
-            "init":     initials(s["customer_name"]),
-            "id":       s["customer_id"],
-            "ref":      ref,
-            "industry": s["industry"],
-            "iEmoji":   INDUSTRY_EMOJI.get(s["industry"],"📋"),
-            "prod":     s["plan_type"] or s["industry"],
-            "scenario": s["scenario_title"] or "",
-            "score":    score,
-            "label":    s["risk_label"] or "RISK",
-            "col":      RISK_COL(score),
-            "status":   s["session_status"] or "Open",
-            "totalInts":s["total_interactions"] or len(ints),
-            "internalNote":   internal_note,
-            "snapshotBullets":snapshot_bullets,
-            "openingLines":   opening_lines,
-            "transcript":     transcript_bubbles,
-            "lastCh":    last_int.get("channel_name","Phone Call"),
-            "nodes":    nodes,
-            "patterns": pat_list,
-            "actions":  act_list,
+            "key":key,"name":s["customer_name"],"init":initials(s["customer_name"]),
+            "id":s["customer_id"],"ref":ref,"industry":s["industry"],
+            "iEmoji":IND_EMOJI.get(s["industry"],"📋"),
+            "prod":s["plan_type"] or s["industry"],"scenario":s["scenario_title"] or "",
+            "score":score,"label":s["risk_label"] or "RISK","col":risk_col(score),
+            "status":s["session_status"] or "Open","totalInts":s["total_interactions"] or len(ints),
+            "internalNote":internal_note(dict(s),ints),
+            "snapshotBullets":snapshot_bullets(dict(s),ints,fps),
+            "openingLines":opening_lines(fps),
+            "transcript":parse_transcript(ints[-1].get("transcript","")),
+            "lastCh":ints[-1].get("channel_name","Phone Call"),
+            "nodes":nodes,
+            "patterns":[{"sev":"🔴" if p["severity"]=="CRITICAL" else "🟠","lbl":p["pattern_type"],"desc":p["pattern_description"]} for p in fps],
+            "actions":[{"pri":a["priority"],"txt":a["action_text"]} for a in acts],
             "rootCause":s["root_cause"] or "",
         })
-
     db.close()
 
-    js_data = "const CASES = " + json.dumps(cases, indent=2, ensure_ascii=False) + ";"
-    html = HTML_TEMPLATE.replace("/*__DB_DATA__*/", js_data)
-
-    with open(OUT_FILE,"w") as f:
-        f.write(html)
-
-    print(f"✓  {OUT_FILE}  —  {len(cases)} cases loaded from DB")
+    js_data="const CASES = "+json.dumps(cases,indent=2,ensure_ascii=False)+";"
+    html=HTML_TEMPLATE.replace("/*__DB_DATA__*/",js_data).replace("<!--__LOGO__-->",logo_svg)
+    with open(OUT_FILE,"w") as f: f.write(html)
+    print(f"✓  {OUT_FILE}  —  {len(cases)} cases  (C26 theme)")
     for c in cases:
-        print(f"   {c['key']}  {c['name']:<22}  risk={c['score']}  {len(c['nodes'])} ints")
+        print(f"   {c['key']}  {c['name']:<22}  risk={c['score']}")
 
-# ── HTML TEMPLATE ─────────────────────────────────────────────────────────────
 HTML_TEMPLATE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Agent Workspace — NiCE CXone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
+/* ── C26 / Cognigy design tokens (NICE canonical) ── */
 :root{
-  --navy:#001B44; --blue:#0D6EFD; --light-blue:#E8F1FF;
-  --green:#198754; --green-bg:#F0FFF4; --green-border:#C3E6CB;
-  --red:#DC3545; --orange:#FD7E14; --yellow:#FFC107;
-  --bg:#F4F6FA; --border:#DEE2E6; --white:#fff;
-  --text:#1A2332; --muted:#6C757D;
-  --sidebar-w:210px; --transcript-w:300px;
-  --hdr-h:44px; --tabbar-h:38px;
+  /* Primary blue */
+  --primary-25:#ecf5fe; --primary-50:#e5f2ff; --primary-100:#d2e7fe;
+  --primary-200:#a7d0fe; --primary-300:#5ea9fd; --primary-400:#308ff8;
+  --primary-500:#126bce; --primary-600:#17569b; --primary-700:#164479;
+  --primary-800:#0e2d4e; --primary-900:#0b233d;
+  /* Neutral */
+  --neutral-0:#ffffff; --neutral-25:#f9fafb; --neutral-50:#f3f4f6;
+  --neutral-100:#e5e7eb; --neutral-200:#d1d5db; --neutral-300:#9ca3af;
+  --neutral-400:#6b7280; --neutral-500:#4b5563; --neutral-600:#374151;
+  --neutral-700:#1f2937; --neutral-800:#111827; --neutral-900:#000000;
+  /* Status */
+  --success:#208337; --success-bg:#effbf1; --success-border:#24943e;
+  --warning:#ffb800; --warning-bg:#fff6e0; --warning-border:#a37a00;
+  --error:#e32926;   --error-bg:#fdeaea;   --error-border:#e53935;
+  /* Teal accent */
+  --teal-300:#00bfa6; --teal-50:#bff4ec;
+  /* Shadows */
+  --shadow-xs:0 1px 2px #1f29370f; --shadow-sm:0 1px 3px #1f29371a;
+  --shadow-md:0 4px 6px #1f29371f; --shadow-lg:0 10px 15px #1f293724;
+  /* Radius */
+  --r-xs:4px; --r-sm:6px; --r-md:8px; --r-lg:12px; --r-full:9999px;
+  /* Spacing */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px;
+  --sp-6:24px; --sp-7:32px;
+  /* Layout */
+  --sidebar-w:220px; --transcript-w:296px; --hdr-h:48px; --tabbar-h:40px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;
   height:100vh;overflow:hidden;display:flex;flex-direction:column;
-  background:var(--bg);color:var(--text);font-size:13px;}
+  background:var(--neutral-50);color:var(--neutral-800);font-size:13px;
+  -webkit-font-smoothing:antialiased;}
 
-/* ── HEADER ── */
-.hdr{height:var(--hdr-h);background:var(--navy);display:flex;align-items:center;
-  padding:0 14px;gap:10px;flex-shrink:0;z-index:100;}
-.hdr-menu{color:rgba(255,255,255,.5);font-size:14px;cursor:pointer;padding:4px;}
-.hdr-title{color:#fff;font-size:13px;font-weight:600;letter-spacing:.2px;}
-.hdr-tabs{display:flex;align-items:stretch;flex:1;height:100%;overflow:hidden;}
-.hdr-tab{display:flex;align-items:center;gap:6px;padding:0 14px;
-  color:rgba(255,255,255,.55);font-size:12px;cursor:pointer;
-  border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;
-  border-right:1px solid rgba(255,255,255,.08);}
-.hdr-tab:hover{color:rgba(255,255,255,.85);}
-.hdr-tab.active{color:#fff;border-bottom-color:var(--blue);}
-.hdr-tab .tab-close{opacity:0;font-size:10px;margin-left:4px;transition:opacity .2s;}
-.hdr-tab:hover .tab-close{opacity:.6;}
-.hdr-tab-add{display:flex;align-items:center;padding:0 10px;
-  color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;}
-.hdr-tab-add:hover{color:rgba(255,255,255,.7);}
-.hdr-right{margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;}
-.hdr-bell{color:rgba(255,255,255,.6);font-size:14px;position:relative;cursor:pointer;}
-.hdr-bell-badge{position:absolute;top:-4px;right:-4px;width:14px;height:14px;
-  background:var(--red);border-radius:50%;font-size:8px;font-weight:700;
-  color:#fff;display:flex;align-items:center;justify-content:center;
-  border:1.5px solid var(--navy);}
-.hdr-avatar{width:28px;height:28px;border-radius:50%;background:var(--blue);
-  color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;}
-.in-call-badge{display:flex;align-items:center;gap:6px;
-  background:rgba(25,135,84,.25);border:1px solid rgba(25,135,84,.4);
-  border-radius:4px;padding:3px 10px;color:#6EE2A0;font-size:11px;font-weight:600;}
-.in-call-dot{width:7px;height:7px;border-radius:50%;background:#28A745;
-  animation:pulse-g 1.5s infinite;}
-@keyframes pulse-g{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.6;transform:scale(.8);}}
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+.hdr{height:var(--hdr-h);background:var(--primary-800);
+  display:flex;align-items:center;padding:0 var(--sp-4);gap:var(--sp-3);
+  flex-shrink:0;z-index:100;box-shadow:var(--shadow-md);}
+.hdr-logo{display:flex;align-items:center;gap:var(--sp-2);flex-shrink:0;}
+.hdr-logo svg{width:22px;height:22px;}
+.hdr-logo-name{color:var(--neutral-0);font-size:14px;font-weight:600;letter-spacing:-0.01em;}
+.hdr-logo-name span{color:var(--primary-300);font-weight:700;}
+.hdr-div{width:1px;height:20px;background:rgba(255,255,255,.15);flex-shrink:0;}
+.hdr-prod{color:rgba(255,255,255,.55);font-size:12px;font-weight:500;white-space:nowrap;}
+.hdr-tabs{display:flex;align-items:stretch;flex:1;height:100%;overflow:hidden;margin-left:var(--sp-2);}
+.hdr-tab{display:flex;align-items:center;gap:var(--sp-1);padding:0 var(--sp-3);
+  color:rgba(255,255,255,.5);font-size:12px;font-weight:500;cursor:pointer;
+  border-bottom:2px solid transparent;white-space:nowrap;transition:all .18s;
+  border-right:1px solid rgba(255,255,255,.06);}
+.hdr-tab:hover{color:rgba(255,255,255,.8);}
+.hdr-tab.active{color:var(--neutral-0);border-bottom-color:var(--primary-300);}
+.hdr-tab .tc{opacity:0;font-size:9px;margin-left:4px;transition:opacity .15s;}
+.hdr-tab:hover .tc{opacity:.5;}
+.hdr-tab-add{display:flex;align-items:center;padding:0 var(--sp-3);
+  color:rgba(255,255,255,.3);cursor:pointer;font-size:13px;transition:color .15s;}
+.hdr-tab-add:hover{color:rgba(255,255,255,.6);}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:var(--sp-3);flex-shrink:0;}
+.hdr-bell{color:rgba(255,255,255,.5);font-size:14px;position:relative;cursor:pointer;padding:4px;}
+.hdr-bell:hover{color:var(--neutral-0);}
+.hdr-bell-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;
+  border-radius:50%;background:var(--error);border:1.5px solid var(--primary-800);}
+.in-call{display:flex;align-items:center;gap:var(--sp-2);
+  background:rgba(32,131,55,.2);border:1px solid rgba(36,148,62,.35);
+  border-radius:var(--r-sm);padding:4px var(--sp-3);
+  color:#6ee2a0;font-size:11px;font-weight:600;}
+.in-call-dot{width:7px;height:7px;border-radius:50%;background:var(--success);
+  animation:pulse-g 1.6s infinite;}
+@keyframes pulse-g{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.75);}}
+.hdr-av{width:30px;height:30px;border-radius:50%;
+  background:var(--primary-600);color:var(--neutral-0);
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
 
-/* ── BODY ── */
+/* ══════════════════════════════════════
+   BODY LAYOUT
+══════════════════════════════════════ */
 .body{flex:1;display:flex;overflow:hidden;}
 
-/* ── SIDEBAR ── */
-.sidebar{width:var(--sidebar-w);background:var(--white);
-  border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
-.sb-cases-hdr{padding:10px 12px 6px;display:flex;align-items:center;justify-content:space-between;}
-.sb-cases-lbl{font-size:11px;font-weight:700;color:var(--text);}
-.sb-cases-sub{font-size:10px;color:var(--muted);}
-.sb-new{margin:0 10px 8px;padding:6px;border:1.5px dashed var(--border);
-  border-radius:6px;background:none;font-size:11px;color:var(--muted);
-  cursor:pointer;width:calc(100% - 20px);transition:all .2s;}
-.sb-new:hover{border-color:var(--blue);color:var(--blue);}
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+.sidebar{width:var(--sidebar-w);background:var(--neutral-0);
+  border-right:1px solid var(--neutral-100);display:flex;flex-direction:column;
+  flex-shrink:0;box-shadow:var(--shadow-xs);}
+.sb-top{padding:var(--sp-3) var(--sp-3) var(--sp-2);}
+.sb-cases-lbl{font-size:11px;font-weight:700;color:var(--neutral-700);letter-spacing:.02em;}
+.sb-cases-sub{font-size:10px;color:var(--neutral-400);margin-top:1px;}
+.sb-new{margin:0 var(--sp-3) var(--sp-2);padding:6px var(--sp-3);
+  border:1.5px dashed var(--neutral-200);border-radius:var(--r-sm);
+  background:none;font-size:11px;font-weight:500;color:var(--neutral-400);
+  cursor:pointer;width:calc(100% - 24px);transition:all .18s;text-align:center;}
+.sb-new:hover{border-color:var(--primary-500);color:var(--primary-500);}
 .sb-list{flex:1;overflow-y:auto;}
-.sb-case{padding:9px 10px;cursor:pointer;border-left:3px solid transparent;
-  transition:all .2s;border-bottom:1px solid var(--bg);}
-.sb-case:hover{background:var(--bg);}
-.sb-case.active{background:var(--light-blue);border-left-color:var(--blue);}
+.sb-case{padding:var(--sp-2) var(--sp-3);cursor:pointer;
+  border-left:3px solid transparent;transition:all .18s;
+  border-bottom:1px solid var(--neutral-50);}
+.sb-case:hover{background:var(--neutral-25);}
+.sb-case.active{background:var(--primary-50);border-left-color:var(--primary-500);}
 .sb-case-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
-.sb-case-name{font-size:12px;font-weight:700;color:var(--text);}
-.sb-case-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;
-  background:var(--light-blue);color:var(--blue);}
-.sb-case-badge.critical{background:#FFF3F3;color:var(--red);}
-.sb-case-desc{font-size:10px;color:var(--muted);line-height:1.4;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.sb-case-foot{display:flex;align-items:center;gap:5px;margin-top:4px;}
-.sb-tag{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:600;
-  background:var(--bg);color:var(--muted);}
-.sb-tag.voice{background:#E8F1FF;color:var(--blue);}
-.sb-controls{padding:8px 10px;border-top:1px solid var(--border);flex-shrink:0;}
-.sb-ctrl-row{display:flex;gap:6px;margin-bottom:6px;}
-.sb-ctrl-btn{flex:1;padding:6px;border:1px solid var(--border);border-radius:5px;
-  background:var(--white);font-size:10px;font-weight:600;cursor:pointer;
+.sb-case-name{font-size:12px;font-weight:600;color:var(--neutral-800);}
+.sb-risk{font-size:9px;font-weight:700;padding:2px 6px;border-radius:var(--r-full);
+  white-space:nowrap;}
+.sb-risk.critical{background:var(--error-bg);color:var(--error);}
+.sb-risk.warning{background:var(--warning-bg);color:#856404;}
+.sb-case-desc{font-size:10px;color:var(--neutral-500);line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:4px;}
+.sb-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.sb-tag{font-size:9px;padding:1px 6px;border-radius:var(--r-full);
+  border:1px solid var(--neutral-100);color:var(--neutral-500);background:var(--neutral-50);}
+.sb-tag.voice{background:var(--primary-50);color:var(--primary-600);border-color:var(--primary-100);}
+.sb-ctrl{padding:var(--sp-2) var(--sp-3) var(--sp-3);border-top:1px solid var(--neutral-100);}
+.sb-ctrl-row{display:flex;gap:var(--sp-2);}
+.sb-btn{flex:1;padding:6px 4px;border:1px solid var(--neutral-200);border-radius:var(--r-sm);
+  background:var(--neutral-0);font-size:10px;font-weight:600;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;gap:2px;
-  color:var(--muted);transition:all .2s;}
-.sb-ctrl-btn:hover{background:var(--bg);}
-.sb-ctrl-btn.end{border-color:#FFCDD2;background:#FFF3F3;color:var(--red);}
-.sb-ctrl-btn.end:hover{background:#FFEBEE;}
-.sb-ctrl-btn i{font-size:12px;}
-.sb-nav{border-top:1px solid var(--border);padding:6px 0;display:flex;flex-direction:column;}
-.sb-nav-item{display:flex;align-items:center;gap:8px;padding:7px 14px;
-  color:var(--muted);cursor:pointer;font-size:11px;transition:all .2s;position:relative;}
-.sb-nav-item:hover{background:var(--bg);color:var(--text);}
-.sb-nav-item.active{color:var(--blue);background:var(--light-blue);}
-.sb-nav-item i{width:16px;text-align:center;font-size:13px;}
-.sb-nav-badge{margin-left:auto;background:var(--red);color:#fff;
-  font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;}
+  color:var(--neutral-500);transition:all .18s;}
+.sb-btn:hover{background:var(--neutral-50);border-color:var(--neutral-300);}
+.sb-btn.end{border-color:#fca5a5;background:var(--error-bg);color:var(--error);}
+.sb-btn.end:hover{background:#fecaca;}
+.sb-btn i{font-size:12px;}
+.sb-nav{border-top:1px solid var(--neutral-100);padding:var(--sp-1) 0;}
+.sb-nav-i{display:flex;align-items:center;gap:var(--sp-2);padding:7px var(--sp-3);
+  color:var(--neutral-400);cursor:pointer;font-size:11px;font-weight:500;
+  transition:all .18s;border-radius:0;}
+.sb-nav-i:hover{background:var(--neutral-50);color:var(--neutral-700);}
+.sb-nav-i.on{color:var(--primary-500);background:var(--primary-50);}
+.sb-nav-i i{width:16px;text-align:center;font-size:13px;}
+.sb-nav-badge{margin-left:auto;background:var(--error);color:#fff;
+  font-size:9px;font-weight:700;padding:1px 5px;border-radius:var(--r-full);}
 
-/* ── MAIN ── */
+/* ══════════════════════════════════════
+   MAIN AREA
+══════════════════════════════════════ */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-.tab-bar{height:var(--tabbar-h);background:var(--white);
-  border-bottom:1px solid var(--border);display:flex;align-items:stretch;flex-shrink:0;}
-.m-tab{display:flex;align-items:center;gap:6px;padding:0 16px;
-  font-size:12px;font-weight:500;cursor:pointer;color:var(--muted);
-  border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;}
-.m-tab:hover{color:var(--text);}
-.m-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600;}
-.m-tab i{font-size:12px;}
-.tab-content{flex:1;overflow-y:auto;padding:14px 16px;}
+.tab-bar{height:var(--tabbar-h);background:var(--neutral-0);
+  border-bottom:1px solid var(--neutral-100);display:flex;align-items:stretch;
+  flex-shrink:0;padding:0 var(--sp-1);}
+.m-tab{display:flex;align-items:center;gap:var(--sp-1);padding:0 var(--sp-4);
+  font-size:12px;font-weight:500;cursor:pointer;color:var(--neutral-400);
+  border-bottom:2px solid transparent;white-space:nowrap;transition:all .18s;}
+.m-tab:hover{color:var(--neutral-600);}
+.m-tab.active{color:var(--primary-500);border-bottom-color:var(--primary-500);font-weight:600;}
+.tab-content{flex:1;overflow-y:auto;padding:var(--sp-4) var(--sp-5);}
 
-/* ── VOICE TAB ── */
-.convo-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;
-  letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-.connected-line{display:flex;align-items:center;gap:8px;padding:8px 12px;
-  background:var(--green-bg);border:1px solid var(--green-border);
-  border-radius:6px;margin-bottom:10px;font-size:12px;color:var(--green);font-weight:600;}
-.connected-line i{font-size:14px;}
-
-/* INTERNAL NOTE */
-.int-note{background:#fff;border:1px solid var(--green-border);border-left:4px solid var(--green);
-  border-radius:8px;padding:13px 15px;margin-bottom:10px;}
-.int-note-hdr{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
-.int-note-tag{background:var(--green-bg);border:1px solid var(--green-border);
-  color:var(--green);font-size:10px;font-weight:700;padding:2px 8px;
-  border-radius:4px;letter-spacing:.3px;}
-.int-note-body{font-size:12px;color:var(--text);line-height:1.7;}
-.int-note-body strong{color:var(--text);}
-
-/* CUSTOMER SNAPSHOT */
-.snapshot{background:var(--white);border:1px solid var(--border);border-radius:8px;
-  padding:13px 15px;margin-bottom:10px;}
-.snap-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.snap-av{width:38px;height:38px;border-radius:50%;background:var(--light-blue);
-  color:var(--blue);font-size:13px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.snap-name{font-size:14px;font-weight:700;}
-.snap-sub{font-size:11px;color:var(--muted);}
-.snap-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
-.snap-tag{font-size:10px;padding:2px 7px;border-radius:10px;
-  border:1px solid var(--border);color:var(--muted);background:var(--bg);}
-.snap-bullets{margin-top:8px;}
-.snap-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
-  color:var(--muted);margin-bottom:5px;}
-.snap-bullet{display:flex;align-items:flex-start;gap:6px;
-  font-size:12px;color:var(--text);padding:3px 0;line-height:1.5;}
-.snap-bullet::before{content:"•";color:var(--blue);font-weight:700;flex-shrink:0;margin-top:1px;}
-
-/* AI OPENING LINES */
-.ai-lines{background:var(--white);border:1px solid var(--border);
-  border-radius:8px;padding:13px 15px;margin-bottom:10px;}
-.ai-lines-hdr{display:flex;align-items:center;gap:7px;margin-bottom:10px;
-  font-size:11px;font-weight:700;color:var(--text);}
-.ai-lines-hdr i{color:var(--blue);}
-.ai-line{padding:9px 12px;border:1px solid var(--border);border-radius:6px;
-  margin-bottom:7px;cursor:pointer;transition:all .2s;}
-.ai-line:last-child{margin-bottom:0;}
-.ai-line:hover{border-color:var(--blue);background:var(--light-blue);}
-.ai-line-q{font-size:12px;color:var(--text);line-height:1.5;margin-bottom:3px;}
-.ai-line-hint{font-size:10px;color:var(--muted);font-style:italic;}
-
-/* ── CUSTOMER HISTORY TAB ── */
-.history-wrap{display:flex;gap:14px;min-height:100%;}
-/* Journey timeline */
-.hist-tl{width:36%;min-width:240px;display:flex;flex-direction:column;gap:0;}
-.hist-tl-hdr{font-size:11px;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;
+/* ══════════════════════════════════════
+   VOICE TAB
+══════════════════════════════════════ */
+.conv-lbl{font-size:10px;font-weight:700;color:var(--neutral-400);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--sp-3);
   display:flex;align-items:center;gap:6px;}
-.risk-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
-  border-radius:20px;font-size:11px;font-weight:700;
-  background:#FFF3F3;color:var(--red);margin-bottom:10px;}
-.tl-node{display:flex;gap:10px;padding:8px;border-radius:7px;
-  cursor:pointer;transition:all .2s;position:relative;margin-bottom:1px;}
-.tl-node:hover{background:var(--bg);}
-.tl-node.sel{background:var(--light-blue);outline:1.5px solid #B8D0FF;}
+.connected-line{display:flex;align-items:center;gap:var(--sp-2);
+  padding:var(--sp-2) var(--sp-3);background:var(--success-bg);
+  border:1px solid var(--success-border);border-radius:var(--r-md);
+  margin-bottom:var(--sp-3);font-size:12px;color:var(--success);font-weight:600;}
+/* Internal Note */
+.int-note{background:var(--neutral-0);border:1px solid var(--success-border);
+  border-left:3px solid var(--success);border-radius:var(--r-md);
+  padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-3);
+  box-shadow:var(--shadow-xs);}
+.note-tag{display:inline-flex;align-items:center;gap:5px;
+  background:var(--success-bg);border:1px solid var(--success-border);
+  color:var(--success);font-size:10px;font-weight:700;
+  padding:2px var(--sp-2);border-radius:var(--r-xs);letter-spacing:.03em;margin-bottom:var(--sp-2);}
+.note-body{font-size:12px;color:var(--neutral-700);line-height:1.7;}
+.note-body strong{color:var(--neutral-800);font-weight:600;}
+/* Snapshot */
+.snapshot{background:var(--neutral-0);border:1px solid var(--neutral-100);
+  border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);
+  margin-bottom:var(--sp-3);box-shadow:var(--shadow-xs);}
+.snap-hdr{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3);}
+.snap-av{width:38px;height:38px;border-radius:50%;
+  background:var(--primary-50);color:var(--primary-600);
+  font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.snap-name{font-size:14px;font-weight:600;color:var(--neutral-800);}
+.snap-sub{font-size:11px;color:var(--neutral-400);margin-top:1px;}
+.snap-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;}
+.snap-tag{font-size:10px;padding:2px 7px;border-radius:var(--r-full);
+  border:1px solid var(--neutral-100);color:var(--neutral-500);background:var(--neutral-50);}
+.snap-sec-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--neutral-400);margin-bottom:var(--sp-2);}
+.snap-bullet{display:flex;align-items:flex-start;gap:6px;
+  font-size:12px;color:var(--neutral-700);padding:3px 0;line-height:1.5;}
+.snap-bullet::before{content:"·";color:var(--primary-400);font-weight:700;flex-shrink:0;font-size:16px;line-height:1.1;}
+/* AI Opening Lines */
+.ai-lines{background:var(--neutral-0);border:1px solid var(--neutral-100);
+  border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);
+  margin-bottom:var(--sp-3);box-shadow:var(--shadow-xs);}
+.ai-lines-hdr{display:flex;align-items:center;gap:var(--sp-2);
+  margin-bottom:var(--sp-3);font-size:11px;font-weight:700;color:var(--neutral-700);}
+.ai-lines-hdr i{color:var(--primary-500);}
+.ai-line{padding:var(--sp-2) var(--sp-3);border:1px solid var(--neutral-100);
+  border-radius:var(--r-sm);margin-bottom:var(--sp-2);cursor:pointer;
+  transition:all .18s;background:var(--neutral-25);}
+.ai-line:last-child{margin-bottom:0;}
+.ai-line:hover{border-color:var(--primary-300);background:var(--primary-50);}
+.ai-line-q{font-size:12px;color:var(--neutral-800);line-height:1.5;margin-bottom:2px;}
+.ai-line-hint{font-size:10px;color:var(--neutral-400);font-style:italic;}
+
+/* ══════════════════════════════════════
+   CUSTOMER HISTORY TAB
+══════════════════════════════════════ */
+.hist-wrap{display:flex;gap:var(--sp-4);}
+.hist-tl{width:35%;min-width:230px;}
+.hist-tl-hdr{font-size:10px;font-weight:700;color:var(--neutral-400);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--sp-2);
+  display:flex;align-items:center;gap:5px;}
+.risk-pill{display:inline-flex;align-items:center;gap:5px;
+  padding:4px var(--sp-3);border-radius:var(--r-full);
+  font-size:11px;font-weight:700;margin-bottom:var(--sp-3);}
+.tl-node{display:flex;gap:var(--sp-2);padding:var(--sp-2);
+  border-radius:var(--r-sm);cursor:pointer;transition:all .18s;
+  position:relative;margin-bottom:1px;}
+.tl-node:hover{background:var(--neutral-50);}
+.tl-node.sel{background:var(--primary-50);outline:1.5px solid var(--primary-200);}
 .tl-node:not(:last-child)::after{content:'';position:absolute;
-  left:26px;top:42px;width:2px;height:calc(100% - 14px);
-  background:var(--border);z-index:0;}
-.tl-ic{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);
-  background:#fff;display:flex;align-items:center;justify-content:center;
+  left:23px;top:40px;width:2px;height:calc(100% - 12px);
+  background:var(--neutral-100);z-index:0;}
+.tl-ic{width:30px;height:30px;border-radius:50%;border:2px solid var(--neutral-100);
+  background:var(--neutral-0);display:flex;align-items:center;justify-content:center;
   font-size:12px;flex-shrink:0;z-index:1;position:relative;}
 .tl-body{flex:1;min-width:0;}
-.tl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
-.tl-ttl{font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tl-dt{font-size:10px;color:var(--muted);white-space:nowrap;margin-left:4px;flex-shrink:0;}
-.tl-ag{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px;}
+.tl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;}
+.tl-ttl{font-size:11px;font-weight:600;color:var(--neutral-700);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tl-dt{font-size:9px;color:var(--neutral-400);white-space:nowrap;margin-left:4px;flex-shrink:0;}
+.tl-ag{font-size:10px;color:var(--neutral-400);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px;}
 .tl-foot{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
-.tl-csat{font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;}
-.c1{background:#FFF3F3;color:var(--red);}.c2{background:#FFF0E6;color:var(--orange);}
-.c3{background:#FFFDE7;color:#856404;}.c4{background:#F0FFF4;color:var(--green);}
-.c5{background:#E8F5E9;color:#1B5E20;}
-.esc-tag{font-size:9px;background:#FFF3F3;color:var(--red);padding:1px 5px;border-radius:3px;font-weight:700;}
+.tl-csat{font-size:9px;padding:1px 5px;border-radius:var(--r-full);font-weight:700;}
+.c1{background:var(--error-bg);color:var(--error);}
+.c2{background:var(--warning-bg);color:#856404;}
+.c3{background:#fffde7;color:#795b00;}
+.c4{background:var(--success-bg);color:var(--success);}
+.c5{background:#e8f5e9;color:#1b5e20;}
+.esc-tag{font-size:9px;background:var(--error-bg);color:var(--error);
+  padding:1px 5px;border-radius:var(--r-xs);font-weight:700;}
 /* AI Brief */
-.hist-brief{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;}
-.brief-card{background:var(--white);border:1px solid var(--border);
-  border-radius:8px;padding:13px 15px;}
-.brief-card-hdr{font-size:10px;font-weight:700;text-transform:uppercase;
-  letter-spacing:.5px;color:var(--muted);margin-bottom:8px;
-  display:flex;align-items:center;gap:6px;}
-.brief-card-hdr i{color:var(--blue);}
-/* Risk hero */
-.risk-hero{display:flex;align-items:center;gap:16px;}
-.risk-ring{width:76px;height:76px;position:relative;flex-shrink:0;}
+.hist-brief{flex:1;display:flex;flex-direction:column;gap:var(--sp-3);min-width:0;}
+.brief-card{background:var(--neutral-0);border:1px solid var(--neutral-100);
+  border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);box-shadow:var(--shadow-xs);}
+.brief-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--neutral-400);margin-bottom:var(--sp-3);
+  display:flex;align-items:center;gap:5px;}
+.brief-hdr i{color:var(--primary-500);}
+.risk-hero{display:flex;align-items:center;gap:var(--sp-4);}
+.risk-ring{width:72px;height:72px;position:relative;flex-shrink:0;}
 .risk-ring svg{transform:rotate(-90deg);}
-.risk-ring .bg{fill:none;stroke:#f0f0f0;stroke-width:8;}
-.risk-ring .fg{fill:none;stroke-width:8;stroke-linecap:round;
-  stroke-dasharray:207;stroke-dashoffset:207;transition:stroke-dashoffset 1.2s ease;}
-.risk-inner{position:absolute;inset:0;display:flex;flex-direction:column;
+.rr-bg{fill:none;stroke:var(--neutral-100);stroke-width:7;}
+.rr-fg{fill:none;stroke-width:7;stroke-linecap:round;
+  stroke-dasharray:201;stroke-dashoffset:201;transition:stroke-dashoffset 1.3s ease;}
+.rr-inner{position:absolute;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;}
-.risk-num{font-size:18px;font-weight:800;line-height:1;}
-.risk-denom{font-size:9px;color:var(--muted);}
-.risk-label-big{font-size:18px;font-weight:800;margin-bottom:5px;}
-.risk-sum{font-size:12px;color:var(--muted);line-height:1.6;}
-/* Pattern table */
+.rr-num{font-size:17px;font-weight:700;line-height:1;}
+.rr-denom{font-size:9px;color:var(--neutral-400);}
+.risk-lbl{font-size:17px;font-weight:700;margin-bottom:4px;}
+.risk-scenario{font-size:12px;color:var(--neutral-500);line-height:1.5;}
 .pat-tbl{width:100%;border-collapse:collapse;}
-.pat-tbl tr{border-bottom:1px solid var(--bg);}
+.pat-tbl tr{border-bottom:1px solid var(--neutral-50);}
 .pat-tbl tr:last-child{border-bottom:none;}
-.pat-tbl td{padding:6px 4px;font-size:11px;vertical-align:top;}
-.pt-sev{width:18px;} .pt-lbl{font-weight:700;width:36%;padding-right:8px;}
-.pt-desc{color:var(--muted);}
-/* Actions */
-.act-item{display:flex;gap:9px;padding:8px 0;
-  border-bottom:1px solid var(--bg);align-items:flex-start;}
+.pat-tbl td{padding:6px 3px;font-size:11px;vertical-align:top;}
+.pt-sev{width:18px;}.pt-lbl{font-weight:600;width:36%;padding-right:8px;color:var(--neutral-700);}
+.pt-desc{color:var(--neutral-400);}
+.act-item{display:flex;gap:var(--sp-2);padding:var(--sp-2) 0;
+  border-bottom:1px solid var(--neutral-50);align-items:flex-start;}
 .act-item:last-child{border-bottom:none;}
-.act-num{width:20px;height:20px;border-radius:50%;background:var(--blue);
-  color:#fff;font-size:10px;font-weight:700;
+.act-num{width:20px;height:20px;border-radius:50%;background:var(--primary-500);
+  color:var(--neutral-0);font-size:10px;font-weight:700;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
 .act-pri{font-size:9px;font-weight:700;text-transform:uppercase;
-  padding:2px 5px;border-radius:3px;display:inline-block;margin-bottom:3px;}
-.pri-critical{background:#FFF3F3;color:var(--red);}
-.pri-high{background:#FFF8F0;color:var(--orange);}
-.pri-medium{background:#FFFDE7;color:#856404;}
-.act-txt{font-size:12px;line-height:1.5;}
+  padding:2px 5px;border-radius:var(--r-xs);display:inline-block;margin-bottom:3px;}
+.pri-critical{background:var(--error-bg);color:var(--error);}
+.pri-high{background:var(--warning-bg);color:#92400e;}
+.pri-medium{background:#fffde7;color:#795b00;}
+.act-txt{font-size:12px;line-height:1.5;color:var(--neutral-700);}
 
-/* ── TRANSCRIPT PANEL ── */
-.tr-panel{width:var(--transcript-w);background:var(--white);
-  border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
-.tr-hdr{padding:10px 13px;background:var(--navy);color:#fff;
+/* ══════════════════════════════════════
+   TRANSCRIPT PANEL
+══════════════════════════════════════ */
+.tr-panel{width:var(--transcript-w);background:var(--neutral-0);
+  border-left:1px solid var(--neutral-100);display:flex;flex-direction:column;flex-shrink:0;}
+.tr-hdr{padding:var(--sp-2) var(--sp-3);background:var(--primary-800);
   display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.tr-hdr-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;}
-.tr-hdr-name{font-size:11px;opacity:.7;margin-top:1px;}
-.tr-live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#6EE2A0;}
-.tr-live-dot{width:6px;height:6px;border-radius:50%;background:#28A745;animation:pulse-g 1.5s infinite;}
-.tr-body{flex:1;overflow-y:auto;padding:12px 10px;}
-.bubble{margin-bottom:8px;}
-.bubble-sp{font-size:9px;font-weight:700;color:var(--muted);
-  margin-bottom:2px;text-transform:uppercase;letter-spacing:.4px;}
-.bubble-txt{padding:8px 11px;border-radius:10px;font-size:11px;
-  line-height:1.6;max-width:90%;white-space:pre-line;}
-.b-cust .bubble-txt{background:var(--light-blue);}
-.b-agent .bubble-txt{background:var(--bg);}
-.b-sys .bubble-sp{color:var(--green);}
-.b-sys .bubble-txt{background:var(--green-bg);color:#155724;font-style:italic;}
+.tr-hdr-left .tr-lbl{font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;color:rgba(255,255,255,.5);}
+.tr-hdr-left .tr-name{font-size:12px;font-weight:600;color:var(--neutral-0);margin-top:1px;}
+.tr-live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#6ee2a0;}
+.tr-live-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse-g 1.5s infinite;}
+.tr-body{flex:1;overflow-y:auto;padding:var(--sp-3);}
+.bubble{margin-bottom:var(--sp-2);}
+.bubble-sp{font-size:9px;font-weight:700;color:var(--neutral-300);
+  margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em;}
+.bubble-txt{padding:var(--sp-2) var(--sp-3);border-radius:var(--r-md);
+  font-size:11px;line-height:1.6;max-width:92%;white-space:pre-line;}
+.b-cust .bubble-sp{color:var(--primary-400);}
+.b-cust .bubble-txt{background:var(--primary-50);color:var(--neutral-700);}
+.b-agent .bubble-sp{color:var(--neutral-400);}
+.b-agent .bubble-txt{background:var(--neutral-50);color:var(--neutral-700);}
+.b-sys .bubble-sp{color:var(--success);}
+.b-sys .bubble-txt{background:var(--success-bg);color:#155724;font-style:italic;font-size:10px;}
 
-/* ── DRAWER (transcript detail) ── */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:200;
-  opacity:0;pointer-events:none;transition:opacity .3s;}
+/* ══════════════════════════════════════
+   DRAWER
+══════════════════════════════════════ */
+.overlay{position:fixed;inset:0;background:rgba(17,24,39,.3);z-index:200;
+  opacity:0;pointer-events:none;transition:opacity .25s;}
 .overlay.on{opacity:1;pointer-events:all;}
-.drawer{position:fixed;right:0;top:0;bottom:0;width:400px;background:#fff;
-  box-shadow:-4px 0 30px rgba(0,0,0,.15);z-index:201;
-  transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
-  display:flex;flex-direction:column;}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:400px;background:var(--neutral-0);
+  box-shadow:var(--shadow-2xl);z-index:201;transform:translateX(100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
 .drawer.on{transform:translateX(0);}
-.dr-hdr{padding:12px 16px;background:var(--navy);color:#fff;
-  display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.dr-hdr-info h3{font-size:13px;font-weight:700;}
-.dr-hdr-info p{font-size:10px;opacity:.6;}
-.dr-close{margin-left:auto;width:26px;height:26px;border-radius:5px;
-  background:rgba(255,255,255,.15);color:#fff;border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:12px;}
-.dr-close:hover{background:rgba(255,255,255,.25);}
-.dr-meta{padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--border);
-  display:flex;gap:12px;flex-shrink:0;}
-.dr-mi{text-align:center;}
-.dr-mlbl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;}
-.dr-mval{font-size:12px;font-weight:700;margin-top:1px;}
-.dr-body{flex:1;overflow-y:auto;padding:12px 16px;}
-.dr-out{padding:10px 16px;border-top:1px solid var(--border);flex-shrink:0;}
-.dr-out-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;margin-bottom:3px;}
-.dr-out-txt{font-size:12px;line-height:1.5;}
+.dr-hdr{padding:var(--sp-3) var(--sp-4);background:var(--primary-800);
+  display:flex;align-items:center;gap:var(--sp-2);flex-shrink:0;}
+.dr-ic{font-size:18px;}
+.dr-info h3{font-size:13px;font-weight:600;color:var(--neutral-0);}
+.dr-info p{font-size:10px;color:rgba(255,255,255,.5);}
+.dr-close{margin-left:auto;width:26px;height:26px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,.1);color:var(--neutral-0);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;}
+.dr-close:hover{background:rgba(255,255,255,.2);}
+.dr-meta{padding:var(--sp-2) var(--sp-4);background:var(--neutral-25);
+  border-bottom:1px solid var(--neutral-100);display:flex;gap:var(--sp-4);flex-shrink:0;}
+.dr-mi .dr-ml{font-size:9px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--neutral-400);font-weight:700;}
+.dr-mi .dr-mv{font-size:12px;font-weight:600;margin-top:1px;color:var(--neutral-700);}
+.dr-body{flex:1;overflow-y:auto;padding:var(--sp-3) var(--sp-4);}
+.dr-out{padding:var(--sp-3) var(--sp-4);border-top:1px solid var(--neutral-100);flex-shrink:0;}
+.dr-out-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--neutral-400);font-weight:700;margin-bottom:3px;}
+.dr-out-txt{font-size:12px;line-height:1.5;color:var(--neutral-700);}
 
-/* ── scrollbars ── */
+/* scrollbar */
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px;}
+::-webkit-scrollbar-thumb{background:var(--neutral-200);border-radius:var(--r-full);}
+::-webkit-scrollbar-thumb:hover{background:var(--neutral-300);}
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <header class="hdr">
-  <div class="hdr-menu"><i class="fas fa-th"></i></div>
-  <span class="hdr-title">Agent Workspace</span>
+  <div class="hdr-logo">
+    <!--__LOGO__-->
+    <span class="hdr-logo-name">NiCE <span>CXone</span></span>
+  </div>
+  <div class="hdr-div"></div>
+  <span class="hdr-prod">Agent Workspace</span>
   <div class="hdr-tabs" id="hdr-tabs"></div>
   <div class="hdr-right">
-    <div class="hdr-bell"><i class="fas fa-bell"></i>
-      <div class="hdr-bell-badge">4</div>
-    </div>
-    <div class="in-call-badge" id="in-call-badge">
+    <div class="hdr-bell"><i class="fas fa-bell"></i><div class="hdr-bell-dot"></div></div>
+    <div class="in-call" id="in-call">
       <div class="in-call-dot"></div>
       <span>In a Call</span>
       <span id="call-timer">00:00:00</span>
     </div>
-    <div class="hdr-avatar" id="hdr-av">SR</div>
+    <div class="hdr-av" id="hdr-av">SR</div>
   </div>
 </header>
 
@@ -599,26 +545,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sb-cases-hdr">
-      <div><div class="sb-cases-lbl">Cases</div>
-        <div class="sb-cases-sub">3 completed today</div></div>
+    <div class="sb-top">
+      <div class="sb-cases-lbl">Cases</div>
+      <div class="sb-cases-sub">3 completed today</div>
     </div>
-    <button class="sb-new"><i class="fas fa-plus"></i> New Case</button>
+    <button class="sb-new"><i class="fas fa-plus" style="font-size:10px"></i>  New Case</button>
     <div class="sb-list" id="sb-list"></div>
-    <div class="sb-controls">
+    <div class="sb-ctrl">
       <div class="sb-ctrl-row">
-        <button class="sb-ctrl-btn"><i class="fas fa-random"></i><span>Transfer</span></button>
-        <button class="sb-ctrl-btn"><i class="fas fa-pause"></i><span>Hold</span></button>
-        <button class="sb-ctrl-btn end"><i class="fas fa-phone-slash"></i><span>End Call</span></button>
+        <button class="sb-btn"><i class="fas fa-random"></i><span>Transfer</span></button>
+        <button class="sb-btn"><i class="fas fa-pause"></i><span>Hold</span></button>
+        <button class="sb-btn end"><i class="fas fa-phone-slash"></i><span>End Call</span></button>
       </div>
     </div>
     <nav class="sb-nav">
-      <div class="sb-nav-item active"><i class="fas fa-headset"></i>Control Center</div>
-      <div class="sb-nav-item"><i class="fas fa-list"></i>Queue
-        <span class="sb-nav-badge">33</span></div>
-      <div class="sb-nav-item"><i class="fas fa-address-book"></i>Directory</div>
-      <div class="sb-nav-item"><i class="fas fa-calendar"></i>Schedule</div>
-      <div class="sb-nav-item"><i class="fas fa-cog"></i>Settings</div>
+      <div class="sb-nav-i on"><i class="fas fa-headset"></i>Control Center</div>
+      <div class="sb-nav-i"><i class="fas fa-list-ul"></i>Queue<span class="sb-nav-badge">33</span></div>
+      <div class="sb-nav-i"><i class="fas fa-address-book"></i>Directory</div>
+      <div class="sb-nav-i"><i class="fas fa-calendar-alt"></i>Schedule</div>
+      <div class="sb-nav-i"><i class="fas fa-cog"></i>Settings</div>
     </nav>
   </div>
 
@@ -628,11 +573,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     <div class="tab-content" id="tab-content"></div>
   </div>
 
-  <!-- TRANSCRIPT PANEL -->
+  <!-- TRANSCRIPT -->
   <div class="tr-panel">
     <div class="tr-hdr">
-      <div><div class="tr-hdr-lbl">Call Transcript</div>
-        <div class="tr-hdr-name" id="tr-name">—</div></div>
+      <div class="tr-hdr-left">
+        <div class="tr-lbl">Call Transcript</div>
+        <div class="tr-name" id="tr-name">—</div>
+      </div>
       <div class="tr-live"><div class="tr-live-dot"></div>LIVE</div>
     </div>
     <div class="tr-body" id="tr-body"></div>
@@ -643,15 +590,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
   <div class="dr-hdr">
-    <div style="font-size:18px" id="dr-ic">📞</div>
-    <div class="dr-hdr-info"><h3 id="dr-ttl">—</h3><p id="dr-sub">—</p></div>
+    <div class="dr-ic" id="dr-ic">📞</div>
+    <div class="dr-info"><h3 id="dr-ttl">—</h3><p id="dr-sub">—</p></div>
     <button class="dr-close" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
   </div>
   <div class="dr-meta">
-    <div class="dr-mi"><div class="dr-mlbl">Sentiment</div><div class="dr-mval" id="dr-sent">—</div></div>
-    <div class="dr-mi"><div class="dr-mlbl">CSAT</div><div class="dr-mval" id="dr-csat">—</div></div>
-    <div class="dr-mi"><div class="dr-mlbl">Duration</div><div class="dr-mval" id="dr-dur">—</div></div>
-    <div class="dr-mi"><div class="dr-mlbl">Escalated</div><div class="dr-mval" id="dr-esc">No</div></div>
+    <div class="dr-mi"><div class="dr-ml">Sentiment</div><div class="dr-mv" id="dr-sent">—</div></div>
+    <div class="dr-mi"><div class="dr-ml">CSAT</div><div class="dr-mv" id="dr-csat">—</div></div>
+    <div class="dr-mi"><div class="dr-ml">Duration</div><div class="dr-mv" id="dr-dur">—</div></div>
+    <div class="dr-mi"><div class="dr-ml">Escalated</div><div class="dr-mv" id="dr-esc">No</div></div>
   </div>
   <div class="dr-body" id="dr-body"></div>
   <div class="dr-out"><div class="dr-out-lbl">Outcome</div><div class="dr-out-txt" id="dr-out">—</div></div>
@@ -660,133 +607,87 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 <script>
 /*__DB_DATA__*/
 
-/* ── state ── */
-let curKey  = CASES[0]?.key;
-let curTab  = 'voice';
-let callSec = 0;
+let curKey=CASES[0]?.key, curTab='voice', callSec=0;
 
-/* ── boot ── */
 (function init(){
   buildSidebar();
   selectCase(curKey);
-  setInterval(tickTimer, 1000);
+  setInterval(()=>{
+    callSec++;
+    const h=Math.floor(callSec/3600),m=Math.floor((callSec%3600)/60),s=callSec%60;
+    const el=document.getElementById('call-timer');
+    if(el) el.textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':');
+  },1000);
 })();
 
-/* ── timer ── */
-function tickTimer(){
-  callSec++;
-  const h=Math.floor(callSec/3600), m=Math.floor((callSec%3600)/60), s=callSec%60;
-  const el=document.getElementById('call-timer');
-  if(el) el.textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':');
-}
-
-/* ── sidebar ── */
 function buildSidebar(){
-  const list=document.getElementById('sb-list');
-  list.innerHTML=CASES.map(c=>`
+  document.getElementById('sb-list').innerHTML=CASES.map(c=>`
     <div class="sb-case${c.key===curKey?' active':''}" id="sb-${c.key}" onclick="selectCase('${c.key}')">
       <div class="sb-case-top">
         <div class="sb-case-name">${c.name}</div>
-        <div class="sb-case-badge${c.score>=9?' critical':''}">${c.label}</div>
+        <div class="sb-risk ${c.score>=9?'critical':'warning'}">${c.score} ${c.label}</div>
       </div>
       <div class="sb-case-desc">${c.iEmoji} ${c.scenario}</div>
-      <div class="sb-case-foot">
+      <div class="sb-tags">
         <span class="sb-tag voice">VOICE</span>
         <span class="sb-tag">${c.industry}</span>
-        <span class="sb-tag">Risk ${c.score}</span>
       </div>
     </div>`).join('');
 }
 
-/* ── select case ── */
 function selectCase(key){
-  curKey=key;
-  curTab='voice';
+  curKey=key; curTab='voice';
   document.querySelectorAll('.sb-case').forEach(el=>el.classList.remove('active'));
   const sb=document.getElementById('sb-'+key);
   if(sb){sb.classList.add('active');sb.scrollIntoView({block:'nearest'});}
-  const c=CASES.find(x=>x.key===key);
-  if(!c) return;
-  renderHdrTabs(c);
-  renderTranscript(c);
-  renderVoiceTab(c);
-  callSec=0;
-  closeDrawer();
+  const c=CASES.find(x=>x.key===key); if(!c) return;
+  renderHdrTabs(c); renderTranscript(c); renderVoiceTab(c); callSec=0; closeDrawer();
 }
 
-/* ── header tabs ── */
 function renderHdrTabs(c){
   document.getElementById('hdr-tabs').innerHTML=`
     <div class="hdr-tab active">
-      <i class="fas fa-user" style="font-size:11px"></i> ${c.name}
-      <span class="tab-close">✕</span>
+      <i class="fas fa-user" style="font-size:10px"></i>${c.name}<span class="tc">✕</span>
     </div>
     <div class="hdr-tab${curTab==='voice'?' active':''}" onclick="switchTab('voice')">
-      <i class="fas fa-phone" style="font-size:11px"></i> Voice
+      <i class="fas fa-phone" style="font-size:10px"></i>Voice
     </div>
     <div class="hdr-tab${curTab==='history'?' active':''}" onclick="switchTab('history')">
-      <i class="fas fa-route" style="font-size:11px"></i> Customer History
+      <i class="fas fa-route" style="font-size:10px"></i>Customer History
     </div>
     <div class="hdr-tab-add"><i class="fas fa-plus"></i></div>`;
   document.getElementById('hdr-av').textContent=c.init;
   document.getElementById('tr-name').textContent=c.name;
 }
 
-/* ── switch tab ── */
 function switchTab(tab){
   curTab=tab;
-  const c=CASES.find(x=>x.key===curKey);
-  if(!c) return;
+  const c=CASES.find(x=>x.key===curKey); if(!c) return;
   renderHdrTabs(c);
-  // update main tab bar highlight
-  document.querySelectorAll('.m-tab').forEach(el=>{
-    el.classList.toggle('active', el.dataset.tab===tab);
-  });
-  document.getElementById('tab-bar').querySelectorAll('.m-tab').forEach(el=>{
-    el.classList.toggle('active', el.dataset.tab===tab);
-  });
+  document.querySelectorAll('.m-tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));
   if(tab==='voice')   renderVoiceTab(c);
   if(tab==='history') renderHistoryTab(c);
 }
 
-/* ── voice tab ── */
 function renderVoiceTab(c){
-  const tb=document.getElementById('tab-bar');
-  tb.innerHTML=`
-    <div class="m-tab active" data-tab="voice" onclick="switchTab('voice')">
-      <i class="fas fa-phone"></i> Voice
-    </div>
-    <div class="m-tab" data-tab="history" onclick="switchTab('history')">
-      <i class="fas fa-route"></i> Customer History
-    </div>`;
+  document.getElementById('tab-bar').innerHTML=`
+    <div class="m-tab active" data-tab="voice" onclick="switchTab('voice')"><i class="fas fa-phone"></i>Voice</div>
+    <div class="m-tab" data-tab="history" onclick="switchTab('history')"><i class="fas fa-route"></i>Customer History</div>`;
 
-  const tc=document.getElementById('tab-content');
-  const openingLines=c.openingLines.map((l,i)=>`
+  const bullets=c.snapshotBullets.map(b=>`<div class="snap-bullet">${b}</div>`).join('');
+  const lines=c.openingLines.map(l=>`
     <div class="ai-line">
       <div class="ai-line-q">${l.q}</div>
       <div class="ai-line-hint">— ${l.hint}</div>
     </div>`).join('');
 
-  const bullets=c.snapshotBullets.map(b=>`<div class="snap-bullet">${b}</div>`).join('');
-
-  tc.innerHTML=`
-    <div class="convo-lbl">
-      <i class="fas fa-comment-dots" style="color:var(--blue)"></i>
-      Voice · New conversation
-    </div>
-
-    <div class="connected-line">
-      <i class="fas fa-circle"></i>
-      You are now connected with ${c.name}.
-    </div>
-
+  document.getElementById('tab-content').innerHTML=`
+    <div class="conv-lbl"><i class="fas fa-comment-dots" style="color:var(--primary-400)"></i>Voice · New conversation</div>
+    <div class="connected-line"><i class="fas fa-check-circle"></i>You are now connected with ${c.name}.</div>
     <div class="int-note">
-      <div class="int-note-hdr">
-        <span class="int-note-tag">⚡ Internal note</span>
-      </div>
-      <div class="int-note-body">${c.internalNote}</div>
+      <div class="note-tag"><i class="fas fa-bolt" style="font-size:9px"></i>Internal note</div>
+      <div class="note-body">${c.internalNote}</div>
     </div>
-
     <div class="snapshot">
       <div class="snap-hdr">
         <div class="snap-av">${c.init}</div>
@@ -795,53 +696,36 @@ function renderVoiceTab(c){
           <div class="snap-sub">${c.industry} · ${c.ref}</div>
           <div class="snap-tags">
             <span class="snap-tag">${c.industry}</span>
-            <span class="snap-tag">Risk ${c.score}</span>
-            <span class="snap-tag">${c.label}</span>
             <span class="snap-tag">${c.prod}</span>
+            <span class="snap-tag" style="background:var(--error-bg);color:var(--error);border-color:#fca5a5">Risk ${c.score} ${c.label}</span>
           </div>
         </div>
       </div>
-      <div class="snap-bullets">
-        <div class="snap-lbl">Customer Snapshot</div>
-        ${bullets}
-      </div>
+      <div class="snap-sec-lbl">Customer Snapshot</div>
+      ${bullets}
     </div>
-
     <div class="ai-lines">
-      <div class="ai-lines-hdr">
-        <i class="fas fa-robot"></i>
-        ⚡ AI Suggested Opening Lines
-      </div>
-      ${openingLines}
+      <div class="ai-lines-hdr"><i class="fas fa-robot"></i>⚡ AI Suggested Opening Lines</div>
+      ${lines}
     </div>`;
 }
 
-/* ── history tab ── */
 function renderHistoryTab(c){
-  const tb=document.getElementById('tab-bar');
-  tb.innerHTML=`
-    <div class="m-tab" data-tab="voice" onclick="switchTab('voice')">
-      <i class="fas fa-phone"></i> Voice
-    </div>
-    <div class="m-tab active" data-tab="history" onclick="switchTab('history')">
-      <i class="fas fa-route"></i> Customer History
-    </div>`;
+  document.getElementById('tab-bar').innerHTML=`
+    <div class="m-tab" data-tab="voice" onclick="switchTab('voice')"><i class="fas fa-phone"></i>Voice</div>
+    <div class="m-tab active" data-tab="history" onclick="switchTab('history')"><i class="fas fa-route"></i>Customer History</div>`;
 
-  const chColors={voice:'#0D6EFD',email:'#6C757D',chat:'#20C997',
-    livechat:'#20C997',whatsapp:'#25D366',portal:'#6F42C1',
-    callback:'#0D6EFD',social:'#E91E63',mobile:'#FF9800',auto:'#9C27B0'};
+  const chCol={voice:'#126bce',email:'#6b7280',chat:'#00bfa6',livechat:'#00bfa6',
+    whatsapp:'#25d366',portal:'#556cd6',callback:'#126bce',social:'#e754a8',mobile:'#ffb800',auto:'#9ca3af'};
 
   const nodes=c.nodes.map((n,i)=>{
-    const col=chColors[n.ch]||'#0D6EFD';
+    const col=chCol[n.ch]||'#126bce';
     const csat=n.csat?`<span class="tl-csat c${n.csat}">CSAT ${n.csat}/5</span>`:'';
     const esc=n.esc?'<span class="esc-tag">↑ ESC</span>':'';
     return `<div class="tl-node" id="hn${i}" onclick="openDrawer(${i})">
       <div class="tl-ic" style="border-color:${col};color:${col}">${n.icon}</div>
       <div class="tl-body">
-        <div class="tl-top">
-          <div class="tl-ttl">${n.ttl}</div>
-          <div class="tl-dt">${n.dt}</div>
-        </div>
+        <div class="tl-top"><div class="tl-ttl">${n.ttl}</div><div class="tl-dt">${n.dt}</div></div>
         <div class="tl-ag">${n.ag}</div>
         <div class="tl-foot"><span>${n.sEmoji}</span>${csat}${esc}</div>
       </div>
@@ -849,77 +733,69 @@ function renderHistoryTab(c){
   }).join('');
 
   const pats=c.patterns.map(p=>`
-    <tr><td class="pt-sev">${p.sev}</td>
-        <td class="pt-lbl">${p.lbl}</td>
-        <td class="pt-desc">${p.desc}</td></tr>`).join('');
+    <tr><td class="pt-sev">${p.sev}</td><td class="pt-lbl">${p.lbl}</td><td class="pt-desc">${p.desc}</td></tr>`).join('');
 
   const acts=c.actions.map((a,i)=>`
     <div class="act-item">
       <div class="act-num">${i+1}</div>
-      <div><span class="act-pri pri-${a.pri.toLowerCase()}">${a.pri}</span>
-        <div class="act-txt">${a.txt}</div></div>
+      <div><span class="act-pri pri-${a.pri.toLowerCase()}">${a.pri}</span><div class="act-txt">${a.txt}</div></div>
     </div>`).join('');
 
-  // risk ring
-  const circ=207, offset=circ - (c.score/10)*circ;
-
+  const circ=201, offset=circ-(c.score/10)*circ;
   document.getElementById('tab-content').innerHTML=`
-    <div class="history-wrap">
+    <div class="hist-wrap">
       <div class="hist-tl">
-        <div class="hist-tl-hdr"><i class="fas fa-route"></i> Journey Timeline</div>
-        <div class="risk-pill" style="background:#FFF3F3;color:${c.col}">
-          ${c.score} / 10 &nbsp;${c.label}
+        <div class="hist-tl-hdr"><i class="fas fa-route"></i>Journey Timeline</div>
+        <div class="risk-pill" style="background:${c.col}18;color:${c.col};border:1px solid ${c.col}40">
+          ${c.score} / 10 &nbsp; ${c.label}
         </div>
         ${nodes}
       </div>
       <div class="hist-brief">
         <div class="brief-card">
-          <div class="brief-card-hdr"><i class="fas fa-tachometer-alt"></i> Risk Assessment</div>
+          <div class="brief-hdr"><i class="fas fa-tachometer-alt"></i>Risk Assessment</div>
           <div class="risk-hero">
             <div class="risk-ring">
-              <svg width="76" height="76" viewBox="0 0 76 76">
-                <circle class="bg" cx="38" cy="38" r="33"/>
-                <circle class="fg" id="score-fg" cx="38" cy="38" r="33" stroke="${c.col}"/>
+              <svg width="72" height="72" viewBox="0 0 72 72">
+                <circle class="rr-bg" cx="36" cy="36" r="32"/>
+                <circle class="rr-fg" id="score-fg" cx="36" cy="36" r="32" stroke="${c.col}"/>
               </svg>
-              <div class="risk-inner">
-                <div class="risk-num" style="color:${c.col}">${c.score}</div>
-                <div class="risk-denom">/ 10</div>
+              <div class="rr-inner">
+                <div class="rr-num" style="color:${c.col}">${c.score}</div>
+                <div class="rr-denom">/ 10</div>
               </div>
             </div>
             <div>
-              <div class="risk-label-big" style="color:${c.col}">${c.label}</div>
-              <div class="risk-sum">${c.scenario}</div>
+              <div class="risk-lbl" style="color:${c.col}">${c.label}</div>
+              <div class="risk-scenario">${c.scenario}</div>
             </div>
           </div>
         </div>
         <div class="brief-card">
-          <div class="brief-card-hdr"><i class="fas fa-search"></i> Root Cause</div>
-          <div style="font-size:12px;line-height:1.7;color:var(--text)">${c.rootCause||'Analysis in progress.'}</div>
+          <div class="brief-hdr"><i class="fas fa-search"></i>Root Cause</div>
+          <div style="font-size:12px;line-height:1.7;color:var(--neutral-600)">${c.rootCause||'Analysis in progress.'}</div>
         </div>
         <div class="brief-card">
-          <div class="brief-card-hdr"><i class="fas fa-exclamation-triangle"></i> Failure Patterns</div>
+          <div class="brief-hdr"><i class="fas fa-exclamation-triangle"></i>Failure Patterns</div>
           <table class="pat-tbl">${pats}</table>
         </div>
         <div class="brief-card">
-          <div class="brief-card-hdr"><i class="fas fa-tasks"></i> Recommended Actions</div>
+          <div class="brief-hdr"><i class="fas fa-tasks"></i>Recommended Actions</div>
           ${acts}
         </div>
       </div>
     </div>`;
 
-  // animate ring
   requestAnimationFrame(()=>{
     const fg=document.getElementById('score-fg');
     if(fg){fg.style.strokeDasharray=circ;fg.style.strokeDashoffset=offset;}
   });
 }
 
-/* ── right transcript ── */
 function renderTranscript(c){
-  const last=c.transcript;
   document.getElementById('tr-name').textContent=c.name;
-  document.getElementById('tr-body').innerHTML=last.map(l=>{
-    let cls=l.sp==='cust'?'b-cust':l.sp==='sys'?'b-sys':'b-agent';
+  document.getElementById('tr-body').innerHTML=c.transcript.map(l=>{
+    const cls=l.sp==='cust'?'b-cust':l.sp==='sys'?'b-sys':'b-agent';
     return `<div class="bubble ${cls}">
       <div class="bubble-sp">${l.nm}</div>
       <div class="bubble-txt">${l.tx}</div>
@@ -927,44 +803,34 @@ function renderTranscript(c){
   }).join('');
 }
 
-/* ── drawer (interaction detail) ── */
 function openDrawer(idx){
-  const c=CASES.find(x=>x.key===curKey);
-  if(!c) return;
+  const c=CASES.find(x=>x.key===curKey); if(!c) return;
   const n=c.nodes[idx];
   document.querySelectorAll('.tl-node').forEach(el=>el.classList.remove('sel'));
-  const nd=document.getElementById('hn'+idx);
-  if(nd) nd.classList.add('sel');
+  const nd=document.getElementById('hn'+idx); if(nd) nd.classList.add('sel');
   document.getElementById('dr-ic').textContent=n.icon;
   document.getElementById('dr-ttl').textContent=`Contact ${n.seq} — ${n.chNm}`;
   document.getElementById('dr-sub').textContent=`${n.dt} · ${n.ag}`;
   document.getElementById('dr-sent').textContent=`${n.sEmoji} ${sentLabel(n.sent)}`;
   document.getElementById('dr-csat').textContent=n.csat?`${n.csat}/5`:'—';
   document.getElementById('dr-dur').textContent=n.dur||'—';
-  const escEl=document.getElementById('dr-esc');
-  escEl.textContent=n.esc?'⚠️ Yes':'No';
-  escEl.style.color=n.esc?'var(--red)':'inherit';
+  const ee=document.getElementById('dr-esc');
+  ee.textContent=n.esc?'⚠️ Yes':'No'; ee.style.color=n.esc?'var(--error)':'inherit';
   document.getElementById('dr-out').textContent=n.out;
   document.getElementById('dr-body').innerHTML=n.lines.map(l=>{
-    let cls=l.sp==='cust'?'b-cust':l.sp==='sys'?'b-sys':'b-agent';
-    return `<div class="bubble ${cls}">
-      <div class="bubble-sp">${l.nm}</div>
-      <div class="bubble-txt">${l.tx}</div>
-    </div>`;
+    const cls=l.sp==='cust'?'b-cust':l.sp==='sys'?'b-sys':'b-agent';
+    return `<div class="bubble ${cls}"><div class="bubble-sp">${l.nm}</div><div class="bubble-txt">${l.tx}</div></div>`;
   }).join('');
   document.getElementById('overlay').classList.add('on');
   document.getElementById('drawer').classList.add('on');
 }
-
 function closeDrawer(){
   document.getElementById('overlay').classList.remove('on');
   document.getElementById('drawer').classList.remove('on');
   document.querySelectorAll('.tl-node').forEach(el=>el.classList.remove('sel'));
 }
-
-const SENT_LABELS={neutral:'Neutral','slightly-neg':'Slightly Negative',
-  neg:'Negative','very-neg':'Very Negative',pos:'Positive'};
-function sentLabel(s){return SENT_LABELS[s]||s;}
+const SL={neutral:'Neutral','slightly-neg':'Slightly Negative',neg:'Negative','very-neg':'Very Negative',pos:'Positive'};
+function sentLabel(s){return SL[s]||s;}
 </script>
 </body>
 </html>"""
