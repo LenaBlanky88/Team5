@@ -205,21 +205,46 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 .risk-lbl{font-size:17px;font-weight:700;margin-bottom:4px;}
 .risk-sc{font-size:12px;color:var(--n500);line-height:1.5;}
 .pat-tbl{width:100%;border-collapse:collapse;}
-.pat-tbl tr{border-bottom:1px solid var(--n50);}
+.pat-tbl tr{border-bottom:1px solid var(--n50);cursor:pointer;transition:background .15s;}
 .pat-tbl tr:last-child{border-bottom:none;}
+.pat-tbl tr:hover{background:var(--n50);}
+.pat-tbl tr.active{background:var(--p50);outline:1.5px solid var(--p200);}
 .pat-tbl td{padding:6px 3px;font-size:11px;vertical-align:top;}
-.pt-sev{width:18px;}.pt-lbl{font-weight:600;width:36%;padding-right:8px;color:var(--n700);}
+.pt-sev{width:38px;padding-right:8px;}
+.pat-count{display:inline-flex;align-items:center;justify-content:center;
+  min-width:30px;padding:2px 8px;font-size:11px;font-weight:700;
+  border-radius:var(--r-full);color:#fff;line-height:1.4;}
+.pat-count.sev-r{background:var(--err);}
+.pat-count.sev-o{background:#d97706;}
+.pt-lbl{font-weight:600;width:36%;padding-right:8px;color:var(--n700);}
 .pt-desc{color:var(--n400);}
 .act-item{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--n50);align-items:flex-start;}
 .act-item:last-child{border-bottom:none;}
 .act-num{width:20px;height:20px;border-radius:50%;background:var(--p500);color:#fff;
   font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.act-body{flex:1;min-width:0;}
 .act-pri{font-size:9px;font-weight:700;text-transform:uppercase;
   padding:2px 5px;border-radius:var(--r-xs);display:inline-block;margin-bottom:3px;}
 .pri-critical{background:var(--err-bg);color:var(--err);}
 .pri-high{background:var(--warn-bg);color:#92400e;}
 .pri-medium{background:#fffde7;color:#795b00;}
 .act-txt{font-size:12px;line-height:1.5;color:var(--n700);}
+.act-btn{display:inline-flex;align-items:center;gap:5px;margin-top:6px;
+  padding:4px 10px;background:var(--p500);color:#fff;border:none;
+  border-radius:var(--r-sm);font-size:10px;font-weight:600;font-family:inherit;
+  cursor:pointer;transition:background .15s;}
+.act-btn:hover{background:var(--p600);}
+.act-btn i{font-size:10px;}
+.act-btn.btn-call{background:var(--ok);}
+.act-btn.btn-call:hover{background:#1a6e2e;}
+.act-btn.btn-apply{background:#7c3aed;}
+.act-btn.btn-apply:hover{background:#6d28d9;}
+.act-btn.btn-apologize{background:#db2777;}
+.act-btn.btn-apologize:hover{background:#be185d;}
+.act-btn.btn-schedule{background:#0891b2;}
+.act-btn.btn-schedule:hover{background:#0e7490;}
+.act-btn.btn-flag{background:var(--n500);}
+.act-btn.btn-flag:hover{background:var(--n600);}
 
 /* ── CHAT BUBBLES (used in drawer) ── */
 .bubble{margin-bottom:10px;}
@@ -261,6 +286,93 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--n200);border-radius:var(--r-full);}
+
+/* ── CUSTOMER STATUS BADGE ── */
+.cust-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:var(--r-full);
+  border:1px solid transparent;vertical-align:middle;white-space:nowrap;}
+.cb-critical{background:var(--err-bg);color:var(--err);border-color:#fca5a5;}
+.cb-high{background:var(--warn-bg);color:#92400e;border-color:#fcd34d;}
+.cb-low{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd);}
+.cc-name-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.snap-name-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+
+/* ── PATTERN PILL LABELS (Voice tab) ── */
+.pat-labels{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;}
+.pat-pill{font-size:10px;font-weight:600;padding:3px 8px;border-radius:var(--r-full);
+  border:1px solid transparent;line-height:1.4;white-space:nowrap;}
+.pat-pill.sev-r{background:var(--err-bg);color:var(--err);border-color:#fca5a5;}
+.pat-pill.sev-o{background:var(--warn-bg);color:#92400e;border-color:#fcd34d;}
+
+/* ── FAILURE PATTERN WIDGETS (Voice tab) ── */
+.pat-widgets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;}
+.pat-widget{padding:8px 10px;border:1px solid var(--n100);border-left:3px solid var(--n200);
+  border-radius:var(--r-sm);background:var(--n0);cursor:pointer;transition:all .18s;}
+.pat-widget:hover{box-shadow:var(--sh-sm);background:var(--n25);border-color:var(--n200);}
+.pat-widget.pw-r{border-left-color:var(--err);}
+.pat-widget.pw-o{border-left-color:var(--warn);}
+.pw-top{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;
+  color:var(--n800);margin-bottom:3px;}
+.pw-lbl{font-size:12px;}
+.pw-desc{font-size:11px;color:var(--n500);line-height:1.4;}
+
+/* ── ISSUE CHIPS PER NODE (Journey timeline) ── */
+.issue-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
+.issue-chip{font-size:9px;font-weight:700;padding:2px 6px;border-radius:var(--r-xs);
+  cursor:pointer;border:1px solid transparent;line-height:1.4;transition:filter .15s;}
+.issue-chip:hover{filter:brightness(.92);}
+.issue-chip.active{outline:1.5px solid currentColor;outline-offset:1px;}
+.ic-broken-promise{background:var(--err-bg);color:var(--err);}
+.ic-sla-breach{background:var(--warn-bg);color:#92400e;}
+.ic-routing-failure{background:var(--p50);color:var(--p600);}
+.ic-ownership-gap{background:#ffedd5;color:#9a3412;}
+.ic-repeat-contact{background:#fef3c7;color:#854d0e;}
+.ic-inconsistent-information{background:#ede9fe;color:#6d28d9;}
+
+/* ── pattern highlights in drawer transcript ── */
+.hl-pattern{padding:2px 6px;border-radius:4px;box-decoration-break:clone;
+  -webkit-box-decoration-break:clone;line-height:1.85;}
+.hl-pattern .hl-tag{display:inline-block;font-size:9px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.04em;margin-left:6px;padding:1px 6px;
+  border-radius:var(--r-xs);background:rgba(255,255,255,.65);vertical-align:1px;}
+.hl-broken-promise{background:#fee2e2;color:#991b1b;}
+.hl-broken-promise .hl-tag{color:#991b1b;}
+.hl-sla-breach{background:#fef3c7;color:#92400e;}
+.hl-sla-breach .hl-tag{color:#92400e;}
+.hl-routing-failure{background:#dbeafe;color:#1e40af;}
+.hl-routing-failure .hl-tag{color:#1e40af;}
+.hl-ownership-gap{background:#ffedd5;color:#9a3412;}
+.hl-ownership-gap .hl-tag{color:#9a3412;}
+.hl-repeat-contact{background:#fef9c3;color:#854d0e;}
+.hl-repeat-contact .hl-tag{color:#854d0e;}
+.hl-inconsistent-information{background:#ede9fe;color:#6d28d9;}
+.hl-inconsistent-information .hl-tag{color:#6d28d9;}
+.dr-pats{padding:8px 10px;background:var(--n25);border:1px solid var(--n100);
+  border-radius:var(--r-sm);margin-bottom:12px;}
+.dr-pats-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--n400);margin-bottom:5px;}
+.dr-pats-row{display:flex;flex-wrap:wrap;gap:4px;}
+.dr-pats-empty{font-size:11px;color:var(--n400);font-style:italic;}
+
+/* ── ISSUE FILTER BAR + NODE STATES ── */
+.flt-bar{display:none;align-items:center;gap:6px;padding:6px 10px;background:var(--n50);
+  border:1px solid var(--n100);border-radius:var(--r-sm);font-size:11px;margin-bottom:8px;}
+.flt-bar.on{display:flex;}
+.flt-bar-lbl{font-weight:600;color:var(--n500);}
+.flt-bar-tag{font-weight:700;padding:2px 8px;border-radius:var(--r-xs);}
+.flt-bar-x{margin-left:auto;cursor:pointer;color:var(--n400);width:20px;height:20px;
+  display:flex;align-items:center;justify-content:center;border-radius:var(--r-xs);font-size:11px;}
+.flt-bar-x:hover{background:var(--n100);color:var(--n700);}
+.tl-node.dim{opacity:.35;filter:grayscale(1);}
+.tl-node.hl{outline:2px solid;outline-offset:-1px;background:var(--n0);}
+
+/* ── JOURNEY TIMELINE CUSTOMER HEADER ── */
+.tl-cust-line{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.tl-cust-name{font-size:13px;font-weight:600;color:var(--n800);}
+
+/* ── SENTIMENT ICON ── */
+.sent-ico{width:16px;height:16px;display:inline-block;vertical-align:middle;flex-shrink:0;}
+.dr-mv .sent-ico{width:18px;height:18px;margin-right:4px;}
 </style>
 </head>
 <body>
@@ -345,6 +457,288 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 
 <script>
 const CASES=[
+  {
+    "key": "MC-BILL-NM-887241",
+    "name": "Rachel Torres",
+    "init": "RT",
+    "id": "CUST-MOB-44822",
+    "ref": "ACC-NM-887241",
+    "industry": "Telecom",
+    "iEmoji": "📱",
+    "prod": "NovaMax Unlimited Premium",
+    "scenario": "The Bill That Nobody Fixed — And the Hotspot That Kept Breaking",
+    "score": 7.8,
+    "label": "HIGH CHURN RISK",
+    "col": "#ffb800",
+    "status": "Resolved",
+    "totalInts": 7,
+    "lastCh": "Callback",
+    "internalNote": "Rachel Torres has contacted Telecom support <strong>7 times</strong> regarding: <strong>The Bill That Nobody Fixed — And the Hotspot That Kept Breaking</strong>. Most recent contact via <strong>Callback</strong>. The billing dispute stemmed from a known system miscategorisation on Unlimited Premium accounts. The first agent raised no ticket; the second routed TKT-MOB-330291 to the wrong queue where it sat for 15 days. In parallel, a recurring provisioning flag broke her hotspot twice before a permanent network-level fix was applied.",
+    "snapshotBullets": [
+      "Telecom customer · NovaMax Unlimited Premium · CUST-MOB-44822",
+      "Platinum Member · 6-year relationship",
+      "Two parallel issues: $38.50 disputed billing + recurring hotspot failure",
+      "Ticket TKT-MOB-330291 sat in wrong queue 15 days",
+      "Last contact via Senior Advisor Callback · resolved with 15% retention offer"
+    ],
+    "openingLines": [
+      {
+        "q": "I can see you've had two separate issues open for nearly a month — I'm taking ownership of both today.",
+        "hint": "cross-issue accountability in one breath"
+      },
+      {
+        "q": "A 48-hour callback was promised on May 7. That commitment wasn't kept — I'm here to fix that.",
+        "hint": "names the broken promise explicitly"
+      },
+      {
+        "q": "You're a Platinum customer of 6 years. Let me confirm both fixes are in place before we end this call.",
+        "hint": "anchors on tenure and tangible outcome"
+      }
+    ],
+    "transcript": [
+      {
+        "sp": "agent",
+        "nm": "Dominic",
+        "tx": "Rachel, this is Dominic Carr, Senior Customer Relations at NovaMobile. I've been assigned to your account personally."
+      },
+      {
+        "sp": "agent",
+        "nm": "Dominic",
+        "tx": "I've verified a $38.50 credit has been applied. The hotspot has been permanently resolved at the network level."
+      },
+      {
+        "sp": "cust",
+        "nm": "Rachel",
+        "tx": "I appreciate you saying that. I've been a customer for six years and I've had to fight to get basic things fixed."
+      }
+    ],
+    "sentimentTrend": [
+      "slightly-neg",
+      "neg",
+      "neg",
+      "pos",
+      "very-neg",
+      "very-neg",
+      "pos"
+    ],
+    "nodes": [
+      {
+        "seq": 1,
+        "ch": "voice",
+        "icon": "📞",
+        "chNm": "Phone Call",
+        "ttl": "Phone Call — Billing Dispute Raised",
+        "dt": "2026-05-01",
+        "ag": "Daniel Hurst",
+        "sent": "slightly-neg",
+        "sEmoji": "😕",
+        "csat": 3,
+        "esc": false,
+        "dur": "13 min",
+        "lines": [
+          {"sp":"cust","nm":"Rachel","tx":"Hi. I'm calling about my latest bill. I've been charged $38.50 for data overages, but I'm on the Unlimited Premium plan. That shouldn't be possible."},
+          {"sp":"agent","nm":"Daniel","tx":"The charge was applied April 30th, labelled as a domestic data overage. That does look unusual for your plan."},
+          {"sp":"cust","nm":"Rachel","tx":"I've had this plan for three years and never been charged for overages."},
+          {"sp":"agent","nm":"Daniel","tx":"Let me look into this further on my end and get back to you. I'll make a note on your account."},
+          {"sp":"cust","nm":"Rachel","tx":"It would be helpful if someone called me. I'd rather not have to chase this."}
+        ],
+        "out": "Billing dispute logged as an informal note only. No ticket created. No follow-up scheduled. Verbal promise, no case number."
+      },
+      {
+        "seq": 2,
+        "ch": "voice",
+        "icon": "📞",
+        "chNm": "Phone Call",
+        "ttl": "Phone Call — Ticket Opened, 48h Callback Promised",
+        "dt": "2026-05-07",
+        "ag": "Priya Okafor",
+        "sent": "neg",
+        "sEmoji": "😞",
+        "csat": 2,
+        "esc": false,
+        "dur": "19 min",
+        "lines": [
+          {"sp":"cust","nm":"Rachel","tx":"Hi — I'm calling about a billing issue I reported six days ago. I still haven't heard back."},
+          {"sp":"agent","nm":"Priya","tx":"I can see an informal note from May 1st, but I don't see a ticket or case number raised."},
+          {"sp":"cust","nm":"Rachel","tx":"So nothing was actually done in six days?"},
+          {"sp":"agent","nm":"Priya","tx":"I'm raising a formal ticket right now. I'm promising you a callback within 48 hours. Your ticket number is TKT-MOB-330291."}
+        ],
+        "out": "Ticket TKT-MOB-330291 opened but misrouted to Network Faults queue instead of Billing Disputes. 48-hour callback SLA not met. Billing dispute still pending."
+      },
+      {
+        "seq": 3,
+        "ch": "voice",
+        "icon": "📞",
+        "chNm": "Phone Call",
+        "ttl": "Phone Call — Hotspot Not Working (New Issue)",
+        "dt": "2026-05-10",
+        "ag": "Marcus Webb",
+        "sent": "neg",
+        "sEmoji": "😞",
+        "csat": 2,
+        "esc": false,
+        "dur": "15 min",
+        "lines": [
+          {"sp":"cust","nm":"Rachel","tx":"I have two things — a billing issue that's been open nearly two weeks with no update, and now my mobile hotspot has completely stopped working."},
+          {"sp":"agent","nm":"Marcus","tx":"Your hotspot service flag is showing inactive on our system even though your plan entitles you to it. This is a provisioning configuration issue."},
+          {"sp":"agent","nm":"Marcus","tx":"I need to escalate to our provisioning team — they'll call you within 24 hours."},
+          {"sp":"cust","nm":"Rachel","tx":"Can they also look at my billing ticket? TKT-MOB-330291. That's been waiting ten days."},
+          {"sp":"cust","nm":"Rachel","tx":"I'm a six-year Platinum customer. I really hope someone takes ownership of this."}
+        ],
+        "out": "Hotspot escalated to provisioning team with 24h callback. Billing ticket cross-referenced but not actioned. Two open issues — no single owner."
+      },
+      {
+        "seq": 4,
+        "ch": "callback",
+        "icon": "📲",
+        "chNm": "Callback",
+        "ttl": "Outbound Callback — Hotspot Restored (Temporary Fix)",
+        "dt": "2026-05-11",
+        "ag": "Simone Adeyemi",
+        "sent": "pos",
+        "sEmoji": "😊",
+        "csat": 4,
+        "esc": false,
+        "dur": "14 min",
+        "lines": [
+          {"sp":"agent","nm":"Simone","tx":"Hi Rachel, this is Simone from NovaMobile Provisioning. Your hotspot feature had dropped out of active provisioning."},
+          {"sp":"agent","nm":"Simone","tx":"I've applied a profile reset. Can you restart your phone?"},
+          {"sp":"cust","nm":"Rachel","tx":"Sure... okay, it's back on. The hotspot is working!"},
+          {"sp":"cust","nm":"Rachel","tx":"Any update on my billing ticket — TKT-MOB-330291?"},
+          {"sp":"agent","nm":"Simone","tx":"I'm in Provisioning so I can't action billing directly, but I'll flag it again for the billing team."}
+        ],
+        "out": "Hotspot restored via temporary profile reset. Root cause unresolved — expected to recur. Billing ticket still unactioned in wrong queue."
+      },
+      {
+        "seq": 5,
+        "ch": "voice",
+        "icon": "📞",
+        "chNm": "Phone Call",
+        "ttl": "Phone Call — Hotspot Fails Again",
+        "dt": "2026-05-17",
+        "ag": "Marcus Webb",
+        "sent": "very-neg",
+        "sEmoji": "😡",
+        "csat": 1,
+        "esc": true,
+        "dur": "19 min",
+        "lines": [
+          {"sp":"cust","nm":"Rachel","tx":"Marcus, the hotspot is down again. Someone reset the profile, it worked for six days, and now it's down again."},
+          {"sp":"cust","nm":"Rachel","tx":"And I still have no update on my billing ticket from sixteen days ago."},
+          {"sp":"cust","nm":"Rachel","tx":"At what point does someone actually own my account? I've called five times. I'm Platinum. I'm seriously thinking about switching providers."},
+          {"sp":"agent","nm":"Marcus","tx":"I'm flagging your account for a senior review right now. I've also re-routed the billing ticket directly to the Billing Disputes team."}
+        ],
+        "out": "Hotspot escalated as repeat failure. Billing ticket re-routed. Senior advisor escalation raised. Rachel threatening churn explicitly."
+      },
+      {
+        "seq": 6,
+        "ch": "voice",
+        "icon": "📞",
+        "chNm": "Phone Call",
+        "ttl": "Phone Call — Billing Status Chase (Day 22)",
+        "dt": "2026-05-22",
+        "ag": "Priya Okafor",
+        "sent": "very-neg",
+        "sEmoji": "😡",
+        "csat": 1,
+        "esc": true,
+        "dur": "21 min",
+        "lines": [
+          {"sp":"cust","nm":"Rachel","tx":"Priya, you opened a billing ticket for me fifteen days ago — TKT-MOB-330291. I was promised a 48-hour callback. It never happened."},
+          {"sp":"agent","nm":"Priya","tx":"I can see it was routed to the Network Faults team instead of Billing Disputes. It's been sitting there for fifteen days without being actioned."},
+          {"sp":"cust","nm":"Rachel","tx":"Fifteen days. Nobody noticed."},
+          {"sp":"agent","nm":"Priya","tx":"I'm re-routing it to Billing Disputes right now, marking it urgent, and adding a priority flag given your tenure and Platinum status."},
+          {"sp":"cust","nm":"Rachel","tx":"At this point I just want the charge removed and my hotspot to work. That's all."}
+        ],
+        "out": "Billing ticket re-routed after 15 days in wrong queue. Priority flag added. Senior escalation re-triggered. Customer trust severely eroded."
+      },
+      {
+        "seq": 7,
+        "ch": "callback",
+        "icon": "📲",
+        "chNm": "Callback",
+        "ttl": "Senior Advisor Callback — Both Issues Resolved",
+        "dt": "2026-05-25",
+        "ag": "Dominic Carr",
+        "sent": "pos",
+        "sEmoji": "😊",
+        "csat": 4,
+        "esc": false,
+        "dur": "37 min",
+        "lines": [
+          {"sp":"agent","nm":"Dominic","tx":"Rachel, this is Dominic Carr, Senior Customer Relations at NovaMobile. I've been assigned to your account personally."},
+          {"sp":"agent","nm":"Dominic","tx":"I've verified a $38.50 credit has been applied this morning. The charge was caused by a system miscategorisation affecting a small group of Unlimited Premium accounts."},
+          {"sp":"agent","nm":"Dominic","tx":"The hotspot root cause was a recurring provisioning flag triggered by periodic network refreshes. I've had that flag permanently resolved at the network level for your specific account."},
+          {"sp":"agent","nm":"Dominic","tx":"I'd also like to offer you a 15% discount on your plan for the next three billing cycles, as an acknowledgement of what you've been through."},
+          {"sp":"cust","nm":"Rachel","tx":"Yes, I'd accept that. Thank you Dominic."}
+        ],
+        "out": "Billing credit confirmed ($38.50). Hotspot permanently fixed at network level. 15% discount applied for 3 months. Retention offer accepted."
+      }
+    ],
+    "patterns": [
+      {
+        "sev": "🔴",
+        "lbl": "Broken Promise",
+        "desc": "Verbal promise at Interaction 1 with no ticket; 48-hour callback at Interaction 2 missed for 17 days"
+      },
+      {
+        "sev": "🔴",
+        "lbl": "Routing Failure",
+        "desc": "Ticket TKT-MOB-330291 misrouted to Network Faults queue instead of Billing Disputes for 15 days"
+      },
+      {
+        "sev": "🔴",
+        "lbl": "SLA Breach",
+        "desc": "Billing dispute open 22 days; 48-hour callback SLA missed by 15+ days"
+      },
+      {
+        "sev": "🔴",
+        "lbl": "Ownership Gap",
+        "desc": "Two simultaneous open issues with no single case owner across Billing, Technical, and Provisioning teams"
+      },
+      {
+        "sev": "🟠",
+        "lbl": "Repeat Contact",
+        "desc": "Rachel made 5 inbound calls for issues that should have been resolved proactively"
+      },
+      {
+        "sev": "🟠",
+        "lbl": "Inconsistent Information",
+        "desc": "Hotspot marked Resolved after temporary reset while underlying provisioning flag remained active"
+      }
+    ],
+    "actions": [
+      {
+        "pri": "Critical",
+        "txt": "Confirm the $38.50 billing credit is applied to Rachel's June statement — share the credit reference"
+      },
+      {
+        "pri": "Critical",
+        "txt": "Confirm the permanent hotspot provisioning fix at network level and share the service note reference"
+      },
+      {
+        "pri": "High",
+        "txt": "Activate the 15% retention discount on her plan for the next 3 billing cycles"
+      },
+      {
+        "pri": "High",
+        "txt": "Apologize personally for the 22-day billing dispute and the unkept 48-hour callback promise"
+      },
+      {
+        "pri": "Medium",
+        "txt": "Send a written email summary with TKT-MOB-330291 closure, hotspot fix reference, and the retention discount details"
+      },
+      {
+        "pri": "Medium",
+        "txt": "Schedule a 14-day check-in call to verify hotspot stability and the credit appearance on her June statement"
+      },
+      {
+        "pri": "Medium",
+        "txt": "Note Rachel's account: any future fault on this line auto-escalates to Senior Customer Relations (Platinum tier)"
+      }
+    ],
+    "rootCause": "Two independent failures compounded each other. The billing dispute was caused by a known system miscategorisation affecting Unlimited Premium accounts — a known defect not communicated proactively to affected customers. The first agent failed to open a ticket; when the second agent did, it was misrouted to the wrong team for 15 days. The hotspot failure was caused by a recurring provisioning flag triggered by periodic network refreshes — a known infrastructure issue not documented in agent tooling, leading to repeated temporary fixes. No system detected that a single customer had two simultaneous open issues, and no single owner was assigned."
+  },
   {
     "key": "MC-AUTH-HC-220891",
     "name": "Jennifer Martinez",
@@ -663,12 +1057,7 @@ const CASES=[
       {
         "sev": "🔴",
         "lbl": "Broken Promise",
-        "desc": "Agent promised 48-hour expedited review. No action taken."
-      },
-      {
-        "sev": "🔴",
-        "lbl": "Medical Urgency Ignored",
-        "desc": "Cardiac referral not flagged as clinically time-sensitive"
+        "desc": "Agent promised 48-hour expedited review at Interaction 3. No action taken."
       },
       {
         "sev": "🔴",
@@ -676,42 +1065,40 @@ const CASES=[
         "desc": "Patient contacted insurer 5 times across 5 channels"
       },
       {
-        "sev": "🟠",
-        "lbl": "Channel Switching",
-        "desc": "Phone, Portal, Email before escalation"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "No Proactive Communication",
-        "desc": "Zero outbound updates across 17 days"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Treatment Delay",
-        "desc": "Missed specialist appointment due to authorization failure"
-      },
-      {
-        "sev": "🟠",
+        "sev": "🔴",
         "lbl": "Ownership Gap",
-        "desc": "Request sat unassigned in queue with no reviewer"
+        "desc": "Authorization request sat unassigned in queue with no clinical reviewer"
+      },
+      {
+        "sev": "🟠",
+        "lbl": "Inconsistent Information",
+        "desc": "Portal showed Pending Review with no timeline; first agent quoted standard 5-7 days without flagging urgency"
       }
     ],
     "actions": [
       {
-        "pri": "High",
-        "txt": "Auto-flag authorizations with appointment dates within 10 days as clinically urgent"
+        "pri": "Critical",
+        "txt": "Confirm authorization approval — share AUTH-HC-220891 reference with Jennifer and Riverside Heart Center"
+      },
+      {
+        "pri": "Critical",
+        "txt": "Call Riverside Heart Center on Jennifer's behalf to confirm the June 22nd appointment is locked in"
       },
       {
         "pri": "High",
-        "txt": "Trigger supervisor alert when authorization exceeds 5 days with no assigned reviewer"
+        "txt": "Waive cancellation/no-show fees from the missed June 18th appointment"
+      },
+      {
+        "pri": "High",
+        "txt": "Apologize personally for the SLA breach and the unkept 48-hour callback promise"
       },
       {
         "pri": "Medium",
-        "txt": "Send proactive status updates to member every 3 days while authorization is pending"
+        "txt": "Apply a goodwill credit (premium waiver / wellness benefit) — supervisor discretion"
       },
       {
         "pri": "Medium",
-        "txt": "Detect broken promise pattern: flag when promised action not completed within stated timeframe"
+        "txt": "Schedule a follow-up call within 48 hours of the June 22nd appointment to confirm she was seen"
       }
     ],
     "rootCause": "Prior authorization request was received but never assigned to a clinical reviewer. The system lacked automatic escalation triggers for time-sensitive medical cases. An agent promise of expedited review was not backed by any system action. No proactive outbound communication process existed."
@@ -928,69 +1315,54 @@ const CASES=[
     "patterns": [
       {
         "sev": "🔴",
-        "lbl": "Pre-Sale Infrastructure Failure",
-        "desc": "Address not surveyed before service sold, installation impossible"
-      },
-      {
-        "sev": "🔴",
-        "lbl": "Unnotified Appointment Miss",
-        "desc": "First technician reassigned with no customer notification"
-      },
-      {
-        "sev": "🔴",
         "lbl": "Broken Promise",
-        "desc": "Survey and callback promised four times; none completed on time"
+        "desc": "Survey and callback promised four times across different agents; none completed on time"
       },
       {
         "sev": "🔴",
-        "lbl": "Customer Left Without Service",
-        "desc": "14+ days without internet, previous ISP cancelled"
+        "lbl": "SLA Breach",
+        "desc": "Install date promised Sept 5; service still not delivered 14+ days later"
+      },
+      {
+        "sev": "🔴",
+        "lbl": "Ownership Gap",
+        "desc": "No single case owner across Field Engineering, customer service, and install scheduling"
       },
       {
         "sev": "🟠",
-        "lbl": "Survey Result Not Communicated",
-        "desc": "Outcome of external survey not sent to customer for 6 days"
+        "lbl": "Repeat Contact",
+        "desc": "5 contacts across 4 different channels before formal escalation"
       },
       {
         "sev": "🟠",
-        "lbl": "No Interim Solution Offered",
-        "desc": "No mobile data or bridge solution provided during 2-week outage"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Channel Switching",
-        "desc": "Phone, Chat, WhatsApp, Email before formal escalation"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Churn Risk",
-        "desc": "Customer explicitly threatening cancellation and formal regulator complaint"
+        "lbl": "Inconsistent Information",
+        "desc": "First technician reassigned with no notification; external survey marked complete on Sept 13 with no customer visit or contact"
       }
     ],
     "actions": [
       {
-        "pri": "High",
-        "txt": "Mandate infrastructure pre-survey for all multi-dwelling new connection orders"
+        "pri": "Critical",
+        "txt": "Call Field Engineering now and lock a concrete install date — call Emily back today with the slot confirmed"
+      },
+      {
+        "pri": "Critical",
+        "txt": "Activate the mobile broadband bridge solution on her line today as an interim connection"
       },
       {
         "pri": "High",
-        "txt": "Auto-notify customer with 24-hour advance notice when technician appointment is changed or cancelled"
+        "txt": "Issue a full service credit for the period from September 5 onward (no service delivered)"
       },
       {
         "pri": "High",
-        "txt": "Trigger senior case manager assignment when installation order has been open for more than 7 days"
+        "txt": "Waive setup and activation fees on ORD-SL-552018"
       },
       {
         "pri": "High",
-        "txt": "Send automated customer update within 24 hours of any engineering survey outcome"
+        "txt": "Assign yourself as Emily's named single point of contact — give her a direct dial and case reference"
       },
       {
         "pri": "Medium",
-        "txt": "Create interim connectivity policy: offer mobile broadband bridge for customers with installation delays over 5 days"
-      },
-      {
-        "pri": "Medium",
-        "txt": "Detect promise-tracking gap: log callback commitments with owner name and SLA, alert supervisor on breach"
+        "txt": "Send a written email summary within 24h with the install date, credit applied, and escalation owner"
       }
     ],
     "rootCause": "StreamLine accepted a new installation order for a multi-dwelling unit without completing a pre-sale infrastructure survey, making the promised service delivery impossible from the outset. Four separate callback and escalation promises were made by different agents across different channels with no centralised tracking or enforcement."
@@ -1278,60 +1650,58 @@ const CASES=[
       {
         "sev": "🔴",
         "lbl": "Routing Failure",
-        "desc": "Exception request sent to wrong team at first contact"
+        "desc": "Step therapy exception request sent to wrong standard PA queue at first contact"
       },
       {
         "sev": "🔴",
         "lbl": "Broken Promise",
-        "desc": "24-hour callback promised twice, never delivered"
+        "desc": "24-hour callback promised twice across different agents, never delivered"
       },
       {
         "sev": "🔴",
-        "lbl": "Medical Impact",
-        "desc": "Patient without critical medication for 5 days"
+        "lbl": "SLA Breach",
+        "desc": "Patient without critical diabetes medication for 5 days; exception unresolved 9 days"
       },
       {
         "sev": "🔴",
-        "lbl": "Incorrect Information",
-        "desc": "First agent gave wrong process guidance"
+        "lbl": "Inconsistent Information",
+        "desc": "First agent gave incorrect process guidance; chatbot could not locate the exception request raised by doctor's office"
       },
       {
         "sev": "🟠",
         "lbl": "Repeat Contact",
-        "desc": "Patient contacted insurer 5 times across 5 channels"
+        "desc": "Patient contacted insurer 5 times across 5 channels before emergency intervention"
       },
       {
         "sev": "🟠",
-        "lbl": "Escalation Spiral",
-        "desc": "Required Chief Pharmacy Officer intervention"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Channel Switching",
-        "desc": "Phone, Bot, WhatsApp, Escalation before resolution"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Sentiment Deterioration",
-        "desc": "Neutral at start, critical distress by Day 9"
+        "lbl": "Ownership Gap",
+        "desc": "No single owner across Pharmacy Benefits, Member Services, and Clinical Review teams"
       }
     ],
     "actions": [
       {
-        "pri": "High",
-        "txt": "Auto-detect step therapy exception requests and route directly to specialist queue"
+        "pri": "Critical",
+        "txt": "Confirm 12-month Ozempic 1mg exception approval — give Robert the reference to share with his pharmacy"
+      },
+      {
+        "pri": "Critical",
+        "txt": "Call his pharmacy directly to ensure today's 90-day fill is processed without delay"
       },
       {
         "pri": "High",
-        "txt": "Flag cases where medication supply window is under 7 days as medical urgency"
+        "txt": "Waive co-pay on next refill as compensation for the 9-day medication gap"
       },
       {
         "pri": "High",
-        "txt": "Trigger alert when promised callback is not completed within stated timeframe"
+        "txt": "Apologize personally for the routing error and the two unkept 24-hour callback promises"
       },
       {
         "pri": "Medium",
-        "txt": "Enable emergency temporary authorization workflow for critical medications"
+        "txt": "Flag Robert's account so future exception requests route directly to the specialist queue"
+      },
+      {
+        "pri": "Medium",
+        "txt": "Schedule a follow-up call in 7 days to confirm the refill was picked up and he is stable"
       }
     ],
     "rootCause": "Step therapy exception request was misrouted to the standard prior authorization queue at first contact. Two separate agents promised 24-hour callbacks which were not fulfilled. No system trigger existed to detect a patient approaching medication exhaustion."
@@ -1629,55 +1999,53 @@ const CASES=[
       {
         "sev": "🔴",
         "lbl": "Broken Promise",
-        "desc": "Cancellation promised within 48 hours — not actioned"
-      },
-      {
-        "sev": "🔴",
-        "lbl": "Repeat Contact",
-        "desc": "Customer contacted company 5 times before resolution"
-      },
-      {
-        "sev": "🔴",
-        "lbl": "Financial Impact",
-        "desc": "Premium deducted despite active cancellation request"
+        "desc": "Cancellation promised within 48 hours at Interaction 3 — not actioned"
       },
       {
         "sev": "🔴",
         "lbl": "Ownership Gap",
-        "desc": "No owner assigned to the cancellation request"
+        "desc": "No owner assigned to the cancellation request across Retention, Billing, and Service teams"
+      },
+      {
+        "sev": "🔴",
+        "lbl": "SLA Breach",
+        "desc": "Cancellation request open 17+ days; additional premium charged in error after request raised"
       },
       {
         "sev": "🟠",
-        "lbl": "Channel Switching",
-        "desc": "Email, Chatbot, Voice, WhatsApp before escalation"
+        "lbl": "Repeat Contact",
+        "desc": "Customer contacted company 5 times across 4 channels before resolution"
       },
       {
         "sev": "🟠",
-        "lbl": "Escalation Risk",
-        "desc": "Supervisor and manager intervention required"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Sentiment Deterioration",
-        "desc": "Neutral at first contact, Very Negative by interaction 5"
+        "lbl": "Inconsistent Information",
+        "desc": "Chatbot reported it could not process cancellation; subsequent agents had no visibility of prior email and informal note"
       }
     ],
     "actions": [
       {
-        "pri": "High",
-        "txt": "Assign a named owner to every cancellation request within 1 hour of receipt"
+        "pri": "Critical",
+        "txt": "Process the policy cancellation now with effective date backdated to April 1 (original request date)"
+      },
+      {
+        "pri": "Critical",
+        "txt": "Refund the premium charged after April 1 — initiate refund today and quote ETA to Michael"
       },
       {
         "pri": "High",
-        "txt": "Auto-trigger billing freeze when a cancellation request is logged"
+        "txt": "Waive any cancellation fees on POL-784512"
       },
       {
         "pri": "High",
-        "txt": "Send confirmation email to customer within 24 hours of any cancellation request"
+        "txt": "Send a written cancellation confirmation by email with policy number and refund timeline"
       },
       {
         "pri": "Medium",
-        "txt": "Flag promises made by agents and alert supervisor if not actioned within the stated timeframe"
+        "txt": "Apologize for the broken 48-hour callback and the five repeated contacts required"
+      },
+      {
+        "pri": "Medium",
+        "txt": "Add a goodwill note to his account for preferential pricing if he returns for a future policy"
       }
     ],
     "rootCause": "No owner was assigned to the cancellation request. The request remained pending across multiple teams, resulting in a broken promise, additional premium deduction, repeated contacts, and eventual escalation."
@@ -1951,69 +2319,54 @@ const CASES=[
     "patterns": [
       {
         "sev": "🔴",
-        "lbl": "Wrong Diagnosis Repeated",
-        "desc": "Agent incorrectly blamed receiving bank on two consecutive contacts"
+        "lbl": "Inconsistent Information",
+        "desc": "Two consecutive agents incorrectly blamed receiving bank; compliance hold reason not visible to Payments agents"
       },
       {
         "sev": "🔴",
         "lbl": "Broken Promise",
-        "desc": "Callback promised at escalation. Not received for 4 days."
+        "desc": "Callback promised at escalation on April 10; not received for 4 days, triggering formal complaint"
       },
       {
         "sev": "🔴",
-        "lbl": "Incomplete Fix",
-        "desc": "First resolution cleared individual transfer only, left AML rule active"
+        "lbl": "SLA Breach",
+        "desc": "SEPA transfer blocked 7 days at first cycle; full resolution required two cycles spanning a month"
       },
       {
         "sev": "🔴",
-        "lbl": "Silent Resolution",
-        "desc": "Transfer processed with no explanation, apology, or prevention plan"
-      },
-      {
-        "sev": "🔴",
-        "lbl": "Full Cycle Repeated",
-        "desc": "Identical issue, identical wrong diagnosis, identical escalation path one month later"
+        "lbl": "Repeat Contact",
+        "desc": "Identical issue triggered second full cycle one month later — same wrong diagnosis, same escalation path"
       },
       {
         "sev": "🟠",
-        "lbl": "Compliance Visibility Gap",
-        "desc": "Payments agents cannot see compliance hold reasons"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Escalation Ticket Auto-Closed",
-        "desc": "System closed escalation without human confirmation of root cause fix"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Context Loss Between Channels",
-        "desc": "Each agent started from scratch despite 3+ previous contacts on same issue"
+        "lbl": "Ownership Gap",
+        "desc": "Compliance team responsibility not surfaced; escalation auto-closed without human confirmation of root cause fix"
       }
     ],
     "actions": [
       {
         "pri": "Critical",
-        "txt": "Expose compliance hold reason codes to Payments agent interface — eliminate incorrect third-party blame diagnosis"
+        "txt": "Confirm the permanent AML exception for Elena's recurring EUR 4,200 SEPA to EuroBank AG — share the exception reference"
       },
       {
         "pri": "Critical",
-        "txt": "Require human agent confirmation before closing escalation tickets"
-      },
-      {
-        "pri": "Critical",
-        "txt": "When compliance review clears a transfer, auto-trigger review for standing exception on recurring payment patterns"
+        "txt": "Activate the Business Premium tier upgrade today and confirm the new benefits with her"
       },
       {
         "pri": "High",
-        "txt": "Implement recurrence detection: same AML rule + same account within 90 days routes directly to Compliance team"
+        "txt": "Waive any FX or holding fees incurred on the two delayed transfers"
       },
       {
         "pri": "High",
-        "txt": "When a compliance hold resolves, send proactive explanation message — not just automated transfer confirmation"
+        "txt": "Send a written email summary explaining the AML root cause, the standing exception, and how to escalate if it recurs"
       },
       {
         "pri": "Medium",
-        "txt": "Display full cross-channel contact history summary on agent screen at start of each interaction"
+        "txt": "Apologize for the wrong-diagnosis on the first two calls and the missed callback that triggered the formal complaint"
+      },
+      {
+        "pri": "Medium",
+        "txt": "Schedule a check-in call right after her next monthly transfer to confirm it cleared without issue"
       }
     ],
     "rootCause": "A new AML compliance rule triggered on a regular, legitimate SEPA transfer. Payments agents had no visibility into the compliance hold reason, leading to repeated incorrect attribution to the receiving bank. The first resolution cleared the individual transfer but did not apply a standing exception."
@@ -2310,69 +2663,54 @@ const CASES=[
     "patterns": [
       {
         "sev": "🔴",
-        "lbl": "Premature Ticket Closure",
-        "desc": "Ticket marked Resolved twice despite ongoing speed fault"
-      },
-      {
-        "sev": "🔴",
-        "lbl": "Field Visit Failure",
-        "desc": "Technician closed job as No Access without attempting contact"
+        "lbl": "Inconsistent Information",
+        "desc": "Ticket marked Resolved twice while app speed test confirmed 9.4 Mbps on a 500 Mbps plan"
       },
       {
         "sev": "🔴",
         "lbl": "Broken Promise",
-        "desc": "Callback promised three times across journey, never delivered"
+        "desc": "Callback promised three times across journey, never delivered; technician booked but marked No Access without contact attempt"
       },
       {
         "sev": "🔴",
+        "lbl": "SLA Breach",
+        "desc": "Speed fault unresolved 13+ days; customer on 500 Mbps plan getting under 10 Mbps"
+      },
+      {
+        "sev": "🔴",
+        "lbl": "Ownership Gap",
+        "desc": "Persistent fault never escalated to Tier 2 despite 7+ days unresolved; no named case owner"
+      },
+      {
+        "sev": "🟠",
         "lbl": "Repeat Contact",
-        "desc": "5 contacts across 5 channels before escalation"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "No Tier 2 Escalation",
-        "desc": "Persistent fault never escalated despite 7+ days unresolved"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Reputational Risk",
-        "desc": "Customer took issue public on Twitter/X before internal resolution"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Channel Switching",
-        "desc": "Phone, App, Chat, Social Media forced by lack of resolution"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Network Root Cause Unidentified",
-        "desc": "External line fault suspected but not confirmed or repaired"
+        "desc": "5 contacts across 5 channels — only resolved after customer took the issue public on Twitter/X"
       }
     ],
     "actions": [
       {
-        "pri": "High",
-        "txt": "Auto-escalate to Tier 2 when same fault ticket is reopened or unresolved for more than 5 days"
+        "pri": "Critical",
+        "txt": "Confirm the priority technician slot for September 17, 10–11am — send Emily an SMS reminder the day before"
+      },
+      {
+        "pri": "Critical",
+        "txt": "Apply the 50% bill credit from September 1 to the resolution date on Emily's account today"
       },
       {
         "pri": "High",
-        "txt": "Block technician job closure as No Access without photo evidence or customer phone contact record"
+        "txt": "Assign yourself as Emily's named single point of contact — give her a direct dial through to Priority Resolution"
       },
       {
         "pri": "High",
-        "txt": "Trigger supervisor alert when promised callback is not completed within stated timeframe"
-      },
-      {
-        "pri": "High",
-        "txt": "Auto-flag accounts where measured speed falls below 10% of contracted speed for 48+ hours"
+        "txt": "Issue an additional goodwill credit for the no-show technician visit on September 12"
       },
       {
         "pri": "Medium",
-        "txt": "Disable Resolved ticket status when in-app speed test shows performance below threshold"
+        "txt": "Schedule a same-day callback right after the September 17 visit to confirm speeds are restored"
       },
       {
         "pri": "Medium",
-        "txt": "Proactively contact customer if line diagnostic shows ongoing packet loss after a remote reset"
+        "txt": "Note Emily's account: any future fault ticket on TKT-ISP-884401 line auto-escalates to Tier 2 after 48 hours"
       }
     ],
     "rootCause": "Speed fault was caused by a signal-level issue that remote resets could not address. The first ticket was prematurely closed without verification. No auto-escalation rule existed for tickets unresolved after 5 days. Three callback promises were made with no tracking or enforcement mechanism."
@@ -2665,50 +3003,53 @@ const CASES=[
       {
         "sev": "🔴",
         "lbl": "Ownership Gap",
-        "desc": "No single owner assigned across Claims and Underwriting teams"
+        "desc": "No single owner assigned across Claims and Underwriting teams; each blamed the other for final approval"
       },
       {
         "sev": "🔴",
-        "lbl": "Conflicting Information",
-        "desc": "Claims and Underwriting each blamed the other for ownership"
+        "lbl": "Inconsistent Information",
+        "desc": "Claims said Underwriting owned the case; Underwriting said Claims owned final approval — conflicting answers across 4 agents"
       },
       {
         "sev": "🔴",
         "lbl": "Repeat Contact",
-        "desc": "Customer spoke to 4 agents across multiple channels"
+        "desc": "Customer spoke to 4 agents across 4 channels before reaching a dedicated handler"
       },
       {
         "sev": "🟠",
-        "lbl": "Channel Switching",
-        "desc": "Chatbot, Chat, Voice, Email before escalation"
+        "lbl": "SLA Breach",
+        "desc": "$8,500 claim unresolved 17 days with no processing timeline communicated to the customer"
       },
       {
         "sev": "🟠",
-        "lbl": "No Timeline Provided",
-        "desc": "$8,500 claim with no processing timeline communicated"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Escalation Required",
-        "desc": "Escalation desk required to assign dedicated handler"
+        "lbl": "Broken Promise",
+        "desc": "Claim review timeline implied at submission was never met; no proactive update sent"
       }
     ],
     "actions": [
       {
-        "pri": "High",
-        "txt": "Assign a dedicated claim owner at point of submission for all claims above $5,000"
+        "pri": "Critical",
+        "txt": "Confirm the $8,500 water damage claim approval and the 3-business-day payment timeline with Sarah"
+      },
+      {
+        "pri": "Critical",
+        "txt": "Send written confirmation by email with the claim reference CLM-772191 and payout details"
       },
       {
         "pri": "High",
-        "txt": "Send proactive claim status updates every 3 days until resolution"
+        "txt": "Apologize personally for the circular ownership confusion between Claims and Underwriting"
       },
       {
         "pri": "High",
-        "txt": "Define and document ownership boundary between Claims and Underwriting in agent tooling"
+        "txt": "Give Sarah a direct dial to her dedicated claim supervisor for any follow-up questions"
       },
       {
         "pri": "Medium",
-        "txt": "Enable customer-facing claim tracker with named owner and expected resolution date"
+        "txt": "Schedule a follow-up call once payment lands to confirm she received the full $8,500"
+      },
+      {
+        "pri": "Medium",
+        "txt": "Note her account for a goodwill premium credit at next renewal in recognition of the 14-day delay"
       }
     ],
     "rootCause": "Multiple departments involved with no single owner assigned. Claims team and Underwriting team each pointed to the other. Repeated storytelling required and conflicting information provided across contacts."
@@ -2987,60 +3328,59 @@ const CASES=[
     "patterns": [
       {
         "sev": "🔴",
-        "lbl": "Recurring Failure",
-        "desc": "Identical block triggered 3 times with no systemic fix between contacts"
+        "lbl": "Routing Failure",
+        "desc": "Customer needed Fraud Rules team from Call 1; only reached them on Call 3. Live chat had no fraud-rule authority and routed her back to the failed phone channel"
       },
       {
         "sev": "🔴",
-        "lbl": "Context Loss",
-        "desc": "Agents had no visibility into previous interactions on the same issue"
+        "lbl": "Inconsistent Information",
+        "desc": "Agents had no visibility into previous interactions on the same issue — each contact handled in isolation"
       },
       {
         "sev": "🔴",
-        "lbl": "Wrong Escalation Path",
-        "desc": "Customer needed Fraud Rules team from Call 1; reached them on Call 3"
-      },
-      {
-        "sev": "🔴",
-        "lbl": "Customer Abroad With No Working Card",
-        "desc": "High-severity impact caused by known unresolved issue"
-      },
-      {
-        "sev": "🟠",
         "lbl": "Repeat Contact",
-        "desc": "5 contacts across 4 channels for one underlying issue"
+        "desc": "5 contacts across 4 channels for one underlying issue; identical block triggered 3 times in 30 days"
+      },
+      {
+        "sev": "🔴",
+        "lbl": "Broken Promise",
+        "desc": "Card unblock applied 3 times as a temporary fix without addressing the root fraud rule"
       },
       {
         "sev": "🟠",
-        "lbl": "Channel Dead-End",
-        "desc": "Live chat could not take action, directed customer back to failed channel"
+        "lbl": "SLA Breach",
+        "desc": "Same block reason recurred 3 times in 30 days; permanent merchant whitelist not applied until call 5"
       },
       {
         "sev": "🟠",
-        "lbl": "No Proactive Alert",
-        "desc": "System did not notify customer before card blocked payment"
+        "lbl": "Ownership Gap",
+        "desc": "No named owner across Card Services, Fraud Rules, and Live Chat; customer abroad with no working card for 37 minutes"
       }
     ],
     "actions": [
       {
         "pri": "Critical",
-        "txt": "Auto-flag accounts where the same block reason recurs within 30 days — route directly to Fraud Rules team"
+        "txt": "Confirm the permanent Netflix merchant whitelist is in place on card ending 7731 — verify with the Fraud Rules team"
       },
       {
         "pri": "Critical",
-        "txt": "Surface full interaction history on every inbound contact screen"
+        "txt": "Apply the annual card fee waiver for this year on account ACC-774-992-11"
       },
       {
         "pri": "High",
-        "txt": "Prompt agents to submit merchant whitelist when block reason is FraudRule-FX-Recur and merchant appears in 12+ months of history"
+        "txt": "Activate the complimentary travel insurance upgrade and email David the policy details"
       },
       {
         "pri": "High",
-        "txt": "Enable proactive SMS/push alert before card block is applied, for known low-risk recurring payments"
+        "txt": "Send SMS + email confirmation that the whitelist is permanent and won't recur"
       },
       {
         "pri": "Medium",
-        "txt": "Add merchant whitelist self-service option to mobile app for customers with 12+ months transaction history"
+        "txt": "Apologize for the time he was stranded abroad in Germany without a working card"
+      },
+      {
+        "pri": "Medium",
+        "txt": "Schedule a 30-day check-in to verify no further unexpected blocks; provide a direct line to Card Services"
       }
     ],
     "rootCause": "The automated fraud detection rule flagged a known merchant as suspicious on every billing cycle. Agents were not shown interaction history at the start of each call, so each contact was handled in isolation. The correct resolution path was never taken because no system logic prompted it."
@@ -3051,7 +3391,100 @@ const SL={neutral:'Neutral','slightly-neg':'Slightly Negative',neg:'Negative','v
 const SE={neutral:'😐','slightly-neg':'😕',neg:'😞','very-neg':'😡',pos:'😊'};
 function sentEmoji(s){return SE[s]||'😐';}
 
-let curKey=CASES[0]?.key, curTab='voice', callSec=0;
+/* ── Sentiment icons (from Figma — Sentiments Icon set) ── */
+const SENT_SVG={
+  'very-neg':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Strongly Negative"><rect width="32" height="32" rx="6" fill="#BD2A2A"/><circle cx="16" cy="16" r="9" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M11 12.8 L14 13.8 M21 12.8 L18 13.8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M11.5 20 Q16 16.4 20.5 20" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
+  'neg':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Negative"><rect width="32" height="32" rx="6" fill="#FFB8B8"/><circle cx="16" cy="16" r="9" fill="none" stroke="#3a0f0f" stroke-width="1.6" stroke-opacity=".8"/><circle cx="13.2" cy="13.3" r="1.3" fill="#3a0f0f" fill-opacity=".8"/><circle cx="18.8" cy="13.3" r="1.3" fill="#3a0f0f" fill-opacity=".8"/><path d="M11.5 19.5 Q16 15.9 20.5 19.5" stroke="#3a0f0f" stroke-opacity=".8" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`,
+  'slightly-neg':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Slightly Negative"><rect width="32" height="32" rx="6" fill="#FFD8D8"/><circle cx="16" cy="16" r="9" fill="none" stroke="#3a0f0f" stroke-width="1.6" stroke-opacity=".7"/><circle cx="13.2" cy="13.3" r="1.3" fill="#3a0f0f" fill-opacity=".75"/><circle cx="18.8" cy="13.3" r="1.3" fill="#3a0f0f" fill-opacity=".75"/><path d="M11.8 19 Q16 17.2 20.2 19" stroke="#3a0f0f" stroke-opacity=".75" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>`,
+  'neutral':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Neutral"><rect width="32" height="32" rx="6" fill="#E5E7EB"/><circle cx="16" cy="16" r="9" fill="none" stroke="#4b5563" stroke-width="1.6"/><circle cx="13.2" cy="13.5" r="1.3" fill="#4b5563"/><circle cx="18.8" cy="13.5" r="1.3" fill="#4b5563"/><line x1="12" y1="19" x2="20" y2="19" stroke="#4b5563" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  'pos':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Strongly Positive"><rect width="32" height="32" rx="6" fill="#126BCE"/><circle cx="16" cy="16" r="9" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="13.2" cy="13.3" r="1.4" fill="#fff"/><circle cx="18.8" cy="13.3" r="1.4" fill="#fff"/><path d="M11.5 16.8 Q16 21.4 20.5 16.8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`
+};
+function sentIcon(s){return SENT_SVG[s]||SENT_SVG.neutral;}
+
+/* ── customer status (from score) ── */
+function customerStatus(score){
+  if(score>=9)   return {lvl:'Critical', cls:'cb-critical'};
+  if(score>=7)   return {lvl:'High',     cls:'cb-high'};
+  return {lvl:'Low', cls:'cb-low'};
+}
+function statusBadge(score){
+  const s=customerStatus(score);
+  return `<span class="cust-badge ${s.cls}">${s.lvl}</span>`;
+}
+
+/* ── issue tag detection per node ── */
+const ISSUE_RULES=[
+  {tag:'Broken Promise',         re:/\b(promise|promised|promising|commitment|get back to you|look into (this|it)( further)?|let me look into|i'?ll (make a note|flag|investigate|review|raise|call you back|get back|look)|callback within|within (24|48|72) ?hours?|i'?m raising|raising a formal ticket)\b/i},
+  {tag:'SLA Breach',             re:/\b(sla|exceeded|been waiting|haven'?t heard|open for|\d+ days (ago|open|without)|fifteen days|sixteen days|seventeen days|nineteen days|twenty days|22 days|14\+ days|sla not met|callback sla|sitting (there|in)|days without|nineteen)\b/i},
+  {tag:'Routing Failure',        re:/\b(routing|routed|wrong (team|queue|department)|misrouted|re-?routed|network faults queue|wrong queue|routed to .{1,40}? instead)\b/i},
+  {tag:'Ownership Gap',          re:/\b(no response|unassigned|nobody|no (single )?owner|takes ownership|two (open )?issues|no one (owns|has|takes)|i'?m in .{1,30}? so i can'?t|own my account|owns this|i can'?t update|i can'?t action)\b/i},
+  {tag:'Repeat Contact',         re:/\b(repeat|second time|third time|fourth time|five times|four times|i'?ve called|been calling|recur(red|rence)?|same issue|again|called .{1,20}? (times|today)|last week|down again)\b/i},
+  {tag:'Inconsistent Information',re:/\b(conflict|conflicting|inconsistent|contradicting|incorrect|wrong (diagnosis|info|information)|different (agents|answers|teams)|isolation|visibility|no visibility|in isolation|marked .{1,20}? resolved|each (contact|agent)|nobody noticed|i don'?t see (a|any)|cannot locate)\b/i}
+];
+function detectIssues(n){
+  const text=(n.out||'')+' '+(n.lines||[]).map(l=>l.tx).join(' ');
+  return ISSUE_RULES.filter(r=>r.re.test(text)).map(r=>r.tag);
+}
+function countPatternInJourney(c,pat){
+  const descNum=(pat.desc||'').match(/(\d+)\+?\s+(times?|contacts?|calls?|agents?|interactions?|escalations?)/i);
+  if(descNum) return parseInt(descNum[1],10);
+  const rule=ISSUE_RULES.find(r=>r.tag===pat.lbl);
+  const txt=n=>(n.out||'')+' '+(n.lines||[]).map(l=>l.tx).join(' ');
+  if(rule) return c.nodes.filter(n=>rule.re.test(txt(n))).length;
+  if(/channel switching/i.test(pat.lbl)) return new Set(c.nodes.map(n=>n.ch)).size;
+  const stop=new Set(['gap','risk','loss','from','with','that','this','time','rate','full','left','fix']);
+  const words=pat.lbl.toLowerCase().split(/\s+/).filter(w=>w.length>3&&!stop.has(w));
+  if(!words.length) return 1;
+  const re=new RegExp(words.map(w=>'\\b'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'i');
+  const hits=c.nodes.filter(n=>re.test(txt(n))).length;
+  return hits||1;
+}
+function issueClass(tag){return 'ic-'+tag.toLowerCase().replace(/\s+/g,'-');}
+
+/* ── sentence-level pattern highlighter ── */
+function highlightPatterns(text){
+  if(!text) return '';
+  const escaped=String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const re=/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g;
+  let out='',m;
+  while((m=re.exec(escaped))!==null){
+    const sent=m[0];
+    if(!sent.trim()){out+=sent;continue;}
+    const hits=ISSUE_RULES.filter(r=>r.re.test(sent));
+    if(hits.length===0){out+=sent;continue;}
+    const tag=hits[0].tag;
+    const cls='hl-'+tag.toLowerCase().replace(/\s+/g,'-');
+    const tip=hits.map(h=>h.tag).join(' · ');
+    const trim=sent.replace(/\s+$/,'');
+    const trail=sent.substring(trim.length);
+    out+=`<mark class="hl-pattern ${cls}" title="Pattern: ${tip}">${trim}<span class="hl-tag">${tag}</span></mark>${trail}`;
+  }
+  return out;
+}
+
+/* ── action button mapping from verb ── */
+function actionButton(txt){
+  const t=(txt||'').toLowerCase();
+  if(/\bcall\b/.test(t.split(/[—.,]/)[0])||/^call /.test(t)) return {ic:'fa-phone',lbl:'Call',cls:'btn-call'};
+  if(/\bapologi[sz]e/.test(t)) return {ic:'fa-heart',lbl:'Apologize',cls:'btn-apologize'};
+  if(/\b(schedule|follow.?up|check.?in)\b/.test(t)) return {ic:'fa-calendar-alt',lbl:'Schedule',cls:'btn-schedule'};
+  if(/\b(email|sms|written|in writing)\b/.test(t)||/\bsend\b.*(email|message|summary|confirmation|written)/.test(t)) return {ic:'fa-envelope',lbl:'Send',cls:''};
+  if(/\b(waive|credit|refund|reimburse|fee waiver)\b/.test(t)||/\bapply.*(credit|waiver|fee|tier)\b/.test(t)||/\bissue.*credit\b/.test(t)) return {ic:'fa-dollar-sign',lbl:'Apply',cls:'btn-apply'};
+  if(/\b(note|flag)\b/.test(t)) return {ic:'fa-flag',lbl:'Flag account',cls:'btn-flag'};
+  if(/\b(assign)\b/.test(t)) return {ic:'fa-user-plus',lbl:'Assign',cls:''};
+  if(/\b(activate|process|trigger|initiate)\b/.test(t)) return {ic:'fa-bolt',lbl:'Activate',cls:''};
+  if(/^confirm\b|\bconfirm /.test(t)) return {ic:'fa-check',lbl:'Confirm',cls:''};
+  return {ic:'fa-bolt',lbl:'Take action',cls:''};
+}
+function issueColor(tag){
+  const m={
+    'Broken Promise':'#e32926','SLA Breach':'#b45309','Routing Failure':'#126bce',
+    'Ownership Gap':'#9a3412','Repeat Contact':'#854d0e','Inconsistent Information':'#7c3aed'
+  };
+  return m[tag]||'#6b7280';
+}
+
+let curKey=CASES[0]?.key, curTab='voice', callSec=0, activeIssueFilter=null;
 
 (function init(){
   selectCase(curKey);
@@ -3065,7 +3498,7 @@ let curKey=CASES[0]?.key, curTab='voice', callSec=0;
 })();
 
 function selectCase(key){
-  curKey=key; curTab='voice'; closeDrawer();
+  curKey=key; curTab='voice'; activeIssueFilter=null; closeDrawer();
   const c=CASES.find(x=>x.key===key); if(!c) return;
   document.getElementById('hdr-av').textContent=c.init;
   renderCallCard(c);
@@ -3076,7 +3509,10 @@ function selectCase(key){
 function renderCallCard(c){
   document.getElementById('call-card').innerHTML=`
     <div class="cc-top">
-      <div class="cc-name">${c.name}</div>
+      <div class="cc-name-row">
+        <div class="cc-name">${c.name}</div>
+        ${statusBadge(c.score)}
+      </div>
       <div class="cc-top-right">
         <div class="cc-status"><span>Open</span><i class="fas fa-chevron-down"></i></div>
         <div class="cc-menu"><i class="fas fa-ellipsis-v"></i></div>
@@ -3105,6 +3541,7 @@ function renderTabBar(activeTab){
 
 function switchTab(tab){
   curTab=tab;
+  activeIssueFilter=null;
   const c=CASES.find(x=>x.key===curKey); if(!c) return;
   renderTabBar(tab);
   if(tab==='voice')   renderVoiceTab(c);
@@ -3114,34 +3551,45 @@ function switchTab(tab){
 /* ── voice tab ── */
 function renderVoiceTab(c){
   renderTabBar('voice');
-  const bullets=c.snapshotBullets.map(b=>`<div class="snap-bullet">${b}</div>`).join('');
+  const bullets=c.snapshotBullets.slice(1).map(b=>`<div class="snap-bullet">${b}</div>`).join('');
   const lines=c.openingLines.map(l=>`
     <div class="ai-line">
       <div class="ai-line-q">${l.q}</div>
       <div class="ai-line-hint">— ${l.hint}</div>
     </div>`).join('');
+  const widgets=(c.patterns||[]).slice(0,4).map(p=>{
+    const pw=p.sev==='🔴'?'pw-r':'pw-o';
+    const lbl=String(p.lbl).replace(/'/g,"\\'");
+    return `<div class="pat-widget ${pw}" onclick="onPatternClick('${lbl}')">
+      <div class="pw-top">${p.sev} <span class="pw-lbl">${p.lbl}</span></div>
+      <div class="pw-desc">${p.desc}</div>
+    </div>`;
+  }).join('');
   document.getElementById('tab-content').innerHTML=`
     <div class="conv-lbl"><i class="fas fa-comment-dots" style="color:var(--p400)"></i>Voice · New conversation</div>
     <div class="connected-line"><i class="fas fa-check-circle"></i>You are now connected with ${c.name}.</div>
     <div class="int-note">
       <div class="note-tag"><i class="fas fa-bolt" style="font-size:9px"></i>Internal note</div>
-      <div class="note-body">${c.internalNote}</div>
+      <div class="note-body">${c.internalNote.replace(/\s*Risk score:\s*<strong>[^<]+<\/strong>\.\s*/i,' ')}</div>
     </div>
     <div class="snapshot">
       <div class="snap-hdr">
         <div class="snap-av">${c.init}</div>
         <div>
-          <div class="snap-name">${c.name}</div>
+          <div class="snap-name-row">
+            <div class="snap-name">${c.name}</div>
+            ${statusBadge(c.score)}
+          </div>
           <div class="snap-sub">${c.industry} · ${c.ref}</div>
           <div class="snap-tags">
             <span class="snap-tag">${c.industry}</span>
             <span class="snap-tag">${c.prod}</span>
-            <span class="snap-tag" style="background:var(--err-bg);color:var(--err);border-color:#fca5a5">Risk ${c.score}</span>
           </div>
         </div>
       </div>
       <div class="snap-sec-lbl">Customer Snapshot</div>
       ${bullets}
+      ${widgets?`<div class="snap-sec-lbl" style="margin-top:14px">Detected Failure Patterns</div><div class="pat-widgets">${widgets}</div>`:''}
     </div>
     <div class="ai-lines">
       <div class="ai-lines-hdr"><i class="fas fa-robot"></i>⚡ AI Suggested Opening Lines</div>
@@ -3158,29 +3606,52 @@ function renderHistoryTab(c){
     const col=chCol[n.ch]||'#126bce';
     const csat=n.csat?`<span class="tl-csat c${n.csat}">CSAT ${n.csat}/5</span>`:'';
     const esc=n.esc?'<span class="esc-tag">↑ ESC</span>':'';
-    return `<div class="tl-node" id="hn${i}" onclick="openDrawer(${i})">
+    const issues=detectIssues(n);
+    const chips=issues.map(t=>{
+      const safe=t.replace(/'/g,"\\'");
+      return `<span class="issue-chip ${issueClass(t)}" onclick="event.stopPropagation();toggleIssueFilter('${safe}')">${t}</span>`;
+    }).join('');
+    return `<div class="tl-node" id="hn${i}" data-issues="${issues.join('|')}" onclick="openDrawer(${i})">
       <div class="tl-ic" style="border-color:${col};color:${col}">${n.icon}</div>
       <div class="tl-body">
         <div class="tl-top"><div class="tl-ttl">${n.ttl}</div><div class="tl-dt">${n.dt}</div></div>
         <div class="tl-ag">${n.ag}</div>
-        <div class="tl-foot"><span>${n.sEmoji}</span>${csat}${esc}</div>
+        <div class="tl-foot">${sentIcon(n.sent)}${csat}${esc}</div>
+        ${chips?`<div class="issue-chips">${chips}</div>`:''}
       </div>
     </div>`;
   }).join('');
-  const pats=c.patterns.map(p=>`<tr><td class="pt-sev">${p.sev}</td><td class="pt-lbl">${p.lbl}</td><td class="pt-desc">${p.desc}</td></tr>`).join('');
-  const acts=c.actions.map((a,i)=>`
-    <div class="act-item">
+  const pats=c.patterns.map(p=>{
+    const lbl=String(p.lbl).replace(/'/g,"\\'");
+    const sev=p.sev==='🔴'?'sev-r':'sev-o';
+    const n=countPatternInJourney(c,p);
+    return `<tr data-pat-lbl="${p.lbl}" onclick="onPatternClick('${lbl}')">
+      <td class="pt-sev"><span class="pat-count ${sev}" title="Occurrences in journey">${n}</span></td>
+      <td class="pt-lbl">${p.lbl}</td>
+      <td class="pt-desc">${p.desc}</td>
+    </tr>`;
+  }).join('');
+  const acts=c.actions.slice(0,3).map((a,i)=>{
+    const b=actionButton(a.txt);
+    return `<div class="act-item">
       <div class="act-num">${i+1}</div>
-      <div><span class="act-pri pri-${a.pri.toLowerCase()}">${a.pri}</span><div class="act-txt">${a.txt}</div></div>
-    </div>`).join('');
+      <div class="act-body">
+        <span class="act-pri pri-${a.pri.toLowerCase()}">${a.pri}</span>
+        <div class="act-txt">${a.txt}</div>
+        <button class="act-btn ${b.cls}"><i class="fas ${b.ic}"></i>${b.lbl}</button>
+      </div>
+    </div>`;
+  }).join('');
   const circ=201,offset=circ-(c.score/10)*circ;
   document.getElementById('tab-content').innerHTML=`
     <div class="hist-wrap">
       <div class="hist-tl">
         <div class="hist-tl-hdr"><i class="fas fa-route"></i>Journey Timeline</div>
-        <div class="risk-pill" style="background:${c.col}18;color:${c.col};border:1px solid ${c.col}40">
-          ${c.score} / 10 &nbsp; ${c.label}
+        <div class="tl-cust-line">
+          <span class="tl-cust-name">${c.name}</span>
+          ${statusBadge(c.score)}
         </div>
+        <div class="flt-bar" id="flt-bar"></div>
         ${nodes}
       </div>
       <div class="hist-brief">
@@ -3223,6 +3694,80 @@ function renderHistoryTab(c){
   });
 }
 
+/* ── issue filter ── */
+function toggleIssueFilter(tag){
+  activeIssueFilter = (activeIssueFilter===tag) ? null : tag;
+  applyIssueFilter();
+}
+function clearIssueFilter(){
+  activeIssueFilter=null;
+  applyIssueFilter();
+}
+function applyIssueFilter(){
+  const c=CASES.find(x=>x.key===curKey); if(!c) return;
+  const bar=document.getElementById('flt-bar');
+  if(!bar) return;
+  if(!activeIssueFilter){
+    bar.classList.remove('on');
+    bar.innerHTML='';
+    document.querySelectorAll('.tl-node').forEach(el=>{
+      el.classList.remove('dim','hl');
+      el.style.outlineColor='';
+    });
+    document.querySelectorAll('.issue-chip').forEach(el=>el.classList.remove('active'));
+    document.querySelectorAll('.pat-tbl tr').forEach(el=>el.classList.remove('active'));
+    return;
+  }
+  const col=issueColor(activeIssueFilter);
+  bar.classList.add('on');
+  bar.innerHTML=`<span class="flt-bar-lbl">Filter:</span>
+    <span class="flt-bar-tag ${issueClass(activeIssueFilter)}">${activeIssueFilter}</span>
+    <span class="flt-bar-x" onclick="clearIssueFilter()" title="Clear filter"><i class="fas fa-times"></i></span>`;
+  c.nodes.forEach((n,i)=>{
+    const el=document.getElementById('hn'+i); if(!el) return;
+    const matches=detectIssues(n).includes(activeIssueFilter);
+    el.classList.remove('dim');
+    el.classList.toggle('hl', matches);
+    el.style.outlineColor = matches ? col : '';
+  });
+  document.querySelectorAll('.issue-chip').forEach(el=>{
+    el.classList.toggle('active', el.textContent===activeIssueFilter);
+  });
+  document.querySelectorAll('.pat-tbl tr').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('data-pat-lbl')===activeIssueFilter);
+  });
+}
+
+/* ── pattern click → ensure Journey tab + filter + scroll ── */
+function focusOnIssue(lbl){
+  activeIssueFilter = (activeIssueFilter===lbl) ? null : lbl;
+  applyIssueFilter();
+  if(!activeIssueFilter) return;
+  const c=CASES.find(x=>x.key===curKey); if(!c) return;
+  const idx=c.nodes.findIndex(n=>detectIssues(n).includes(activeIssueFilter));
+  if(idx>=0){
+    const el=document.getElementById('hn'+idx);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+}
+function onPatternClick(lbl){
+  if(curTab!=='history'){
+    switchTab('history');
+    requestAnimationFrame(()=>{
+      activeIssueFilter=lbl;
+      applyIssueFilter();
+      const c=CASES.find(x=>x.key===curKey); if(!c) return;
+      const idx=c.nodes.findIndex(n=>detectIssues(n).includes(lbl));
+      if(idx>=0){
+        const el=document.getElementById('hn'+idx);
+        if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    });
+  } else {
+    focusOnIssue(lbl);
+  }
+}
+
 /* ── drawer ── */
 function openDrawer(idx){
   const c=CASES.find(x=>x.key===curKey); if(!c) return;
@@ -3232,16 +3777,23 @@ function openDrawer(idx){
   document.getElementById('dr-ic').textContent=n.icon;
   document.getElementById('dr-ttl').textContent=`Contact ${n.seq} — ${n.chNm}`;
   document.getElementById('dr-sub').textContent=`${n.dt} · ${n.ag}`;
-  document.getElementById('dr-sent').textContent=`${n.sEmoji} ${SL[n.sent]||n.sent}`;
+  document.getElementById('dr-sent').innerHTML=`${sentIcon(n.sent)}<span style="vertical-align:middle">${SL[n.sent]||n.sent}</span>`;
   document.getElementById('dr-csat').textContent=n.csat?`${n.csat}/5`:'—';
   document.getElementById('dr-dur').textContent=n.dur||'—';
   const ee=document.getElementById('dr-esc');
   ee.textContent=n.esc?'⚠️ Yes':'No'; ee.style.color=n.esc?'var(--err)':'inherit';
-  document.getElementById('dr-out').textContent=n.out;
-  document.getElementById('dr-body').innerHTML=n.lines.map(l=>{
+  document.getElementById('dr-out').innerHTML=highlightPatterns(n.out);
+  const detected=detectIssues(n);
+  const patsHdr=detected.length
+    ? `<div class="dr-pats"><div class="dr-pats-lbl">Patterns detected in this contact</div>
+        <div class="dr-pats-row">${detected.map(t=>`<span class="issue-chip ${issueClass(t)}">${t}</span>`).join('')}</div></div>`
+    : `<div class="dr-pats"><div class="dr-pats-lbl">Patterns detected in this contact</div>
+        <div class="dr-pats-empty">No failure patterns detected in this interaction.</div></div>`;
+  const bubbles=n.lines.map(l=>{
     const cls=l.sp==='cust'?'b-cust':l.sp==='sys'?'b-sys':'b-agent';
-    return `<div class="bubble ${cls}"><div class="bubble-sp">${l.nm}</div><div class="bubble-txt">${l.tx}</div></div>`;
+    return `<div class="bubble ${cls}"><div class="bubble-sp">${l.nm}</div><div class="bubble-txt">${highlightPatterns(l.tx)}</div></div>`;
   }).join('');
+  document.getElementById('dr-body').innerHTML=patsHdr+bubbles;
   document.getElementById('overlay').classList.add('on');
   document.getElementById('drawer').classList.add('on');
 }

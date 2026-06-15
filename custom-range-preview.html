@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Range – Options Preview</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           font-size: 13px; background: #f0f2f5; padding: 32px; color: #333; }
+
+    h1 { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+    .subtitle { font-size: 12px; color: #888; margin-bottom: 28px; }
+
+    .section { margin-bottom: 36px; }
+    .section-title {
+      font-size: 13px; font-weight: 700; color: #0057b8;
+      letter-spacing: .3px; margin-bottom: 4px;
+    }
+    .section-desc { font-size: 12px; color: #666; margin-bottom: 14px; }
+
+    /* ── filter bar shell ── */
+    .filters {
+      background: #fff; border-radius: 8px; border: 1px solid #e4e8ed;
+      padding: 10px 14px; display: flex; align-items: flex-start;
+      gap: 10px 16px; flex-wrap: wrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .fg { display: flex; flex-direction: column; gap: 5px; }
+    .flabel { font-size: 10px; font-weight: 700; color: #aaa;
+              text-transform: uppercase; letter-spacing: .4px; }
+    .frow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    select, input[type="date"] {
+      border: 1px solid #d0d7de; border-radius: 6px;
+      padding: 5px 8px; font-size: 13px; color: #333;
+      background: #fff; outline: none;
+    }
+    select:focus, input[type="date"]:focus { border-color: #0057b8; }
+    select.active-custom { border-color: #0057b8; }
+
+    .range-sep { color: #aaa; font-size: 13px; }
+
+    /* chips */
+    .chips { display: flex; gap: 5px; }
+    .chip {
+      padding: 4px 10px; border-radius: 20px; border: 1px solid #d0d7de;
+      background: #fff; font-size: 12px; color: #555;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .chip.on { background: #0057b8; border-color: #0057b8; color: #fff; }
+
+    /* search mock */
+    .search-wrap {
+      display: flex; align-items: center; gap: 7px;
+      border: 1px solid #d0d7de; border-radius: 6px;
+      padding: 5px 9px; background: #fff;
+      min-width: 220px;
+    }
+    .search-placeholder { color: #bbb; font-size: 13px; }
+
+    /* disposition mock */
+    .disp-btn {
+      width: 158px; display: flex; align-items: center; gap: 4px;
+      border: 1px solid #d0d7de; border-radius: 6px;
+      padding: 5px 8px; font-size: 13px; color: #333;
+      background: #fff; cursor: default;
+    }
+    .disp-btn-txt { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .disp-btn-arr { color: #aaa; font-size: 9px; }
+
+    /* ── Option A: inline date inputs on same row ── */
+    .date-inline { display: flex; align-items: center; gap: 6px; }
+    input[type="date"].compact { padding: 5px 6px; font-size: 12px; }
+
+    /* ── Option B: popover panel ── */
+    .popover-wrap { position: relative; }
+    .popover-panel {
+      position: absolute; top: calc(100% + 6px); left: 0; z-index: 50;
+      background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.13);
+      padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;
+      min-width: 260px;
+    }
+    .pop-label { font-size: 10px; font-weight: 700; color: #aaa;
+                 text-transform: uppercase; letter-spacing: .4px; }
+    .pop-row { display: flex; align-items: center; gap: 8px; }
+    .pop-row input[type="date"] { flex: 1; }
+    .pop-apply {
+      align-self: flex-end;
+      padding: 5px 14px; border-radius: 6px;
+      background: #0057b8; color: #fff; border: none;
+      font-size: 12px; font-weight: 600; cursor: default;
+    }
+    .pop-arrow {
+      position: absolute; top: -6px; left: 18px;
+      width: 12px; height: 12px; background: #fff;
+      border-left: 1px solid #d0d7de; border-top: 1px solid #d0d7de;
+      transform: rotate(45deg);
+    }
+
+    /* filter-break */
+    .filter-break { display: none; }
+    @media (max-width: 1200px) {
+      .filter-break { display: block; flex-basis: 100%; height: 0;
+                      border-top: 1px solid #f0f2f5; margin: 2px -14px 0; }
+    }
+
+    .badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      background: #0057b8; color: #fff; border-radius: 8px;
+      padding: 2px 8px; margin-left: 8px; vertical-align: middle;
+    }
+    .pro { color: #2e7d32; font-size: 11px; margin-left: 6px; }
+    .con { color: #c62828; font-size: 11px; margin-left: 6px; }
+  </style>
+</head>
+<body>
+
+<h1>Custom Date Range — Layout Options</h1>
+<p class="subtitle">Both show the full filter bar with "Custom Range…" already selected.</p>
+
+<!-- ══ OPTION A ══ -->
+<div class="section">
+  <div class="section-title">Option A — Inline date pickers <span class="badge">Recommended</span></div>
+  <div class="section-desc">
+    Date inputs appear on the <strong>same row</strong> as the dropdown. Filter bar stays one row, no layout shift.
+    <span class="pro">✔ No extra row</span>
+    <span class="pro">✔ Always visible</span>
+    <span class="con">✖ Bar gets slightly wider</span>
+  </div>
+
+  <div class="filters">
+    <!-- Date – inline -->
+    <div class="fg">
+      <div class="flabel">Date Range</div>
+      <div class="frow date-inline">
+        <select class="active-custom">
+          <option>Custom Range…</option>
+        </select>
+        <input type="date" class="compact" value="2026-05-12">
+        <span class="range-sep">→</span>
+        <input type="date" class="compact" value="2026-05-19">
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="fg" style="flex:1;min-width:180px">
+      <div class="flabel">Search</div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="#aaa"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span class="search-placeholder">Phone, name, account ID…</span>
+      </div>
+    </div>
+
+    <div class="filter-break"></div>
+
+    <!-- Channel -->
+    <div class="fg">
+      <div class="flabel">Channel</div>
+      <div class="chips">
+        <div class="chip on">All</div>
+        <div class="chip">Voice</div>
+        <div class="chip">Chat</div>
+        <div class="chip">Email</div>
+        <div class="chip">SMS</div>
+      </div>
+    </div>
+
+    <!-- Direction -->
+    <div class="fg">
+      <div class="flabel">Direction</div>
+      <div class="chips">
+        <div class="chip on">All</div>
+        <div class="chip">Inbound</div>
+        <div class="chip">Outbound</div>
+      </div>
+    </div>
+
+    <!-- Disposition -->
+    <div class="fg">
+      <div class="flabel">Disposition</div>
+      <div class="disp-btn">
+        <span class="disp-btn-txt">All Dispositions</span>
+        <span class="disp-btn-arr">▼</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ OPTION B ══ -->
+<div class="section">
+  <div class="section-title">Option B — Floating popover</div>
+  <div class="section-desc">
+    Date inputs appear in a <strong>panel below</strong> the Date Range group, floating over the rest of the UI.
+    Filter bar layout never shifts.
+    <span class="pro">✔ Zero layout impact</span>
+    <span class="pro">✔ Clean &amp; compact bar</span>
+    <span class="con">✖ Extra click to apply</span>
+    <span class="con">✖ Covers content below</span>
+  </div>
+
+  <div class="filters" style="position:relative">
+    <!-- Date – popover -->
+    <div class="fg popover-wrap">
+      <div class="flabel">Date Range</div>
+      <div class="frow">
+        <select class="active-custom">
+          <option>Custom Range…</option>
+        </select>
+      </div>
+      <!-- Popover panel (always visible in preview) -->
+      <div class="popover-panel">
+        <div class="pop-arrow"></div>
+        <div>
+          <div class="pop-label" style="margin-bottom:6px">From</div>
+          <input type="date" value="2026-05-12" style="width:100%">
+        </div>
+        <div>
+          <div class="pop-label" style="margin-bottom:6px">To</div>
+          <input type="date" value="2026-05-19" style="width:100%">
+        </div>
+        <button class="pop-apply">Apply</button>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="fg" style="flex:1;min-width:180px">
+      <div class="flabel">Search</div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="#aaa"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <span class="search-placeholder">Phone, name, account ID…</span>
+      </div>
+    </div>
+
+    <div class="filter-break"></div>
+
+    <!-- Channel -->
+    <div class="fg">
+      <div class="flabel">Channel</div>
+      <div class="chips">
+        <div class="chip on">All</div>
+        <div class="chip">Voice</div>
+        <div class="chip">Chat</div>
+        <div class="chip">Email</div>
+        <div class="chip">SMS</div>
+      </div>
+    </div>
+
+    <!-- Direction -->
+    <div class="fg">
+      <div class="flabel">Direction</div>
+      <div class="chips">
+        <div class="chip on">All</div>
+        <div class="chip">Inbound</div>
+        <div class="chip">Outbound</div>
+      </div>
+    </div>
+
+    <!-- Disposition -->
+    <div class="fg">
+      <div class="flabel">Disposition</div>
+      <div class="disp-btn">
+        <span class="disp-btn-txt">All Dispositions</span>
+        <span class="disp-btn-arr">▼</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

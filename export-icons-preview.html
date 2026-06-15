@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Export Icons – Options Preview</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           font-size: 13px; background: #f0f2f5; padding: 32px; color: #333; }
+
+    h1 { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+    .subtitle { font-size: 12px; color: #888; margin-bottom: 32px; }
+
+    .row { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 36px; align-items: flex-start; }
+
+    .option { display: flex; flex-direction: column; gap: 10px; }
+    .option-label {
+      font-size: 11px; font-weight: 700; color: #0057b8;
+      text-transform: uppercase; letter-spacing: .4px;
+    }
+    .option-desc { font-size: 11.5px; color: #777; max-width: 180px; line-height: 1.5; }
+
+    /* dropdown shell */
+    .menu {
+      background: #fff; border: 1px solid #d0d7de; border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.13); min-width: 190px; padding: 4px 0;
+    }
+    .menu-title {
+      font-size: 10px; font-weight: 700; color: #aaa;
+      text-transform: uppercase; letter-spacing: .5px;
+      padding: 8px 14px 4px;
+    }
+    .divider { height: 1px; background: #f0f2f5; margin: 3px 0; }
+
+    .opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px; font-size: 13px; color: #333;
+      cursor: pointer; transition: background .12s;
+    }
+    .opt:hover { background: #f0f4ff; color: #0057b8; }
+    .opt-ext { font-size: 11px; color: #aaa; margin-left: auto; }
+
+    /* ── icon styles per option ── */
+
+    /* A: monochrome SVG — same gray as app nav icons */
+    .ico-a { width: 20px; height: 20px; display:flex; align-items:center; justify-content:center; color:#666; }
+    .opt:hover .ico-a { color: #0057b8; }
+
+    /* B: colored accent badge on file icon */
+    .ico-b { position: relative; width: 20px; height: 20px; flex-shrink:0; }
+    .ico-b svg { display: block; }
+    .ico-b .badge {
+      position: absolute; bottom: -1px; right: -3px;
+      font-size: 6.5px; font-weight: 900; letter-spacing: -.2px;
+      border-radius: 2px; padding: 0px 2px; line-height: 10px;
+      color: #fff;
+    }
+    .badge-csv  { background: #0057b8; }
+    .badge-xlsx { background: #2e7d32; }
+
+    /* C: two-tone icon — colored top fold */
+    .ico-c { width: 20px; height: 20px; flex-shrink:0; }
+
+    /* D: app-style icon inside a tinted circle (matches card-icon style) */
+    .ico-d {
+      width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ico-d-csv  { background: #e3f0ff; color: #0057b8; }
+    .ico-d-xlsx { background: #e8f5e9; color: #2e7d32; }
+    .opt:hover .ico-d-csv  { background: #cce0ff; }
+    .opt:hover .ico-d-xlsx { background: #c8e6c9; }
+
+    .section-heading {
+      font-size: 13px; font-weight: 700; color: #1a1a2e;
+      margin-bottom: 16px; padding-bottom: 6px;
+      border-bottom: 1px solid #e4e8ed;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Export Dropdown — Icon Options</h1>
+<p class="subtitle">All options use SVG to match the app's existing icon language. Hover each item to see the active state.</p>
+
+<div class="row">
+
+  <!-- ── Option A ── -->
+  <div class="option">
+    <div class="option-label">A — Monochrome SVG</div>
+    <div class="option-desc">Same gray-to-blue behavior as every nav icon in the app. Minimal, consistent.</div>
+    <div class="menu">
+      <div class="menu-title">Download as</div>
+      <div class="divider"></div>
+      <div class="opt">
+        <span class="ico-a">
+          <!-- file-text icon -->
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h3v1.5H8V10z"/>
+          </svg>
+        </span>
+        CSV
+        <span class="opt-ext">.csv</span>
+      </div>
+      <div class="opt">
+        <span class="ico-a">
+          <!-- table/grid icon -->
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M3 3v18h18V3H3zm8 16H5v-3h6v3zm0-5H5v-3h6v3zm0-5H5V6h6v3zm8 10h-6v-3h6v3zm0-5h-6v-3h6v3zm0-5h-6V6h6v3z"/>
+          </svg>
+        </span>
+        Excel
+        <span class="opt-ext">.xlsx</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Option B ── -->
+  <div class="option">
+    <div class="option-label">B — File + format badge</div>
+    <div class="option-desc">Document icon with a small colored tag showing the format. Clear at a glance.</div>
+    <div class="menu">
+      <div class="menu-title">Download as</div>
+      <div class="divider"></div>
+      <div class="opt">
+        <span class="ico-b">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#888">
+            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/>
+          </svg>
+          <span class="badge badge-csv">CSV</span>
+        </span>
+        CSV
+        <span class="opt-ext">.csv</span>
+      </div>
+      <div class="opt">
+        <span class="ico-b">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#888">
+            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/>
+          </svg>
+          <span class="badge badge-xlsx">XLS</span>
+        </span>
+        Excel
+        <span class="opt-ext">.xlsx</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Option C ── -->
+  <div class="option">
+    <div class="option-label">C — Two-tone file icon</div>
+    <div class="option-desc">Colored file icons — blue for CSV, green for Excel — matching the card accent colors.</div>
+    <div class="menu">
+      <div class="menu-title">Download as</div>
+      <div class="divider"></div>
+      <div class="opt">
+        <span class="ico-c">
+          <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#0057b8" d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/>
+            <path fill="#ffffff" opacity=".85" d="M13 9V3.5L18.5 9H13z"/>
+            <path fill="#ffffff" opacity=".9" d="M8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h3v1.5H8V10z"/>
+          </svg>
+        </span>
+        CSV
+        <span class="opt-ext">.csv</span>
+      </div>
+      <div class="opt">
+        <span class="ico-c">
+          <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#2e7d32" d="M14 2H6C4.9 2 4 2.9 4 4v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/>
+            <path fill="#ffffff" opacity=".85" d="M13 9V3.5L18.5 9H13z"/>
+            <path fill="#ffffff" opacity=".9" d="M3 3v18h18V3H3zm8 16H5v-3h6v3zm0-5H5v-3h6v3zm0-5H5V6h6v3zm8 10h-6v-3h6v3zm0-5h-6v-3h6v3zm0-5h-6V6h6v3z" transform="translate(0,0) scale(0.5) translate(12,10)"/>
+            <rect fill="#ffffff" opacity=".85" x="7" y="10" width="10" height="1.5" rx=".5"/>
+            <rect fill="#ffffff" opacity=".85" x="7" y="13" width="10" height="1.5" rx=".5"/>
+            <rect fill="#ffffff" opacity=".85" x="7" y="16" width="10" height="1.5" rx=".5"/>
+          </svg>
+        </span>
+        Excel
+        <span class="opt-ext">.xlsx</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Option D ── -->
+  <div class="option">
+    <div class="option-label">D — Tinted icon pill</div>
+    <div class="option-desc">Icon inside a colored rounded square — same pattern as the KPI card icons in the dashboard.</div>
+    <div class="menu">
+      <div class="menu-title">Download as</div>
+      <div class="divider"></div>
+      <div class="opt">
+        <span class="ico-d ico-d-csv">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h3v1.5H8V10z"/>
+          </svg>
+        </span>
+        CSV
+        <span class="opt-ext">.csv</span>
+      </div>
+      <div class="opt">
+        <span class="ico-d ico-d-xlsx">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+            <path d="M3 3v18h18V3H3zm8 16H5v-3h6v3zm0-5H5v-3h6v3zm0-5H5V6h6v3zm8 10h-6v-3h6v3zm0-5h-6v-3h6v3zm0-5h-6V6h6v3z"/>
+          </svg>
+        </span>
+        Excel
+        <span class="opt-ext">.xlsx</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

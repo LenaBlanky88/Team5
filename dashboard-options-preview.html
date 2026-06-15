@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Options Preview</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 28px; color: #333; }
+
+    h2 { font-size: 13px; font-weight: 700; color: #999; text-transform: uppercase;
+         letter-spacing: .6px; margin-bottom: 12px; }
+    .label-badge {
+      display: inline-block; background: #0057b8; color: #fff;
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 12px; margin-bottom: 14px; letter-spacing: .3px;
+    }
+    .section { margin-bottom: 40px; }
+
+    /* ══════════════════════════════════════════
+       OPTION A — Accent cards
+    ══════════════════════════════════════════ */
+    .opt-a {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .acard {
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #e4e8ed;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+      cursor: default;
+    }
+    .acard:hover { box-shadow: 0 6px 20px rgba(0,0,0,.11); transform: translateY(-2px); }
+
+    .acard-accent { height: 4px; }
+    .ac-blue   { background: linear-gradient(90deg,#0057b8,#42a5f5); }
+    .ac-green  { background: linear-gradient(90deg,#2e7d32,#66bb6a); }
+    .ac-orange { background: linear-gradient(90deg,#e65100,#ffa726); }
+    .ac-purple { background: linear-gradient(90deg,#6a1b9a,#ab47bc); }
+
+    .acard-body { padding: 14px 16px 16px; }
+
+    .acard-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+    .acard-title { font-size: 10.5px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: .5px; }
+    .acard-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .ai-blue   { background: #e3f0ff; }
+    .ai-green  { background: #e8f5e9; }
+    .ai-orange { background: #fff3e0; }
+    .ai-purple { background: #f3e5f5; }
+
+    .acard-num { font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+    .num-blue   { color: #0057b8; }
+    .num-green  { color: #2e7d32; }
+    .num-orange { color: #e65100; }
+    .num-purple { color: #6a1b9a; }
+
+    .acard-trend { display: flex; align-items: center; gap: 5px; margin-bottom: 10px; }
+    .trend-up   { font-size: 11px; font-weight: 600; color: #2e7d32; background: #e8f5e9; padding: 1px 6px; border-radius: 10px; }
+    .trend-down { font-size: 11px; font-weight: 600; color: #c62828; background: #ffebee; padding: 1px 6px; border-radius: 10px; }
+    .trend-label { font-size: 11px; color: #aaa; }
+
+    .acard-sub { display: flex; gap: 14px; padding-top: 10px; border-top: 1px solid #f5f5f5; }
+    .asub { display: flex; flex-direction: column; gap: 1px; }
+    .asub-l { font-size: 9.5px; color: #bbb; text-transform: uppercase; }
+    .asub-v { font-size: 12.5px; font-weight: 600; color: #444; }
+
+    .chart-card-a {
+      background: #fff; border-radius: 8px; border: 1px solid #e4e8ed;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06); overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: box-shadow .2s, transform .2s;
+      cursor: default;
+    }
+    .chart-card-a:hover { box-shadow: 0 6px 20px rgba(0,0,0,.11); transform: translateY(-2px); }
+    .cca-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 0; }
+    .cca-title { font-size: 10.5px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: .5px; }
+    .cca-body { flex: 1; display: flex; align-items: center; padding: 6px 8px 14px; }
+    .donut-wrap { position: relative; flex-shrink: 0; }
+    .donut-center {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      text-align: center; pointer-events: none;
+    }
+    .donut-num { font-size: 18px; font-weight: 700; color: #1a1a2e; line-height: 1; }
+    .donut-lbl { font-size: 9px; color: #aaa; text-transform: uppercase; letter-spacing: .3px; }
+
+
+    /* ══════════════════════════════════════════
+       OPTION B — Compact KPI ribbon
+    ══════════════════════════════════════════ */
+    .opt-b {
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #e4e8ed;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      display: flex;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    .kpi-tiles {
+      display: flex;
+      flex: 1;
+      align-items: stretch;
+    }
+
+    .kpi-tile {
+      flex: 1;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 3px;
+      border-right: 1px solid #f0f0f0;
+      transition: background .15s;
+      cursor: default;
+    }
+    .kpi-tile:hover { background: #f7faff; }
+
+    .kpi-label {
+      font-size: 10px; font-weight: 700; color: #bbb;
+      text-transform: uppercase; letter-spacing: .5px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .kpi-label svg { opacity: .5; }
+
+    .kpi-val { font-size: 24px; font-weight: 700; color: #0057b8; line-height: 1; }
+    .kpi-sub { font-size: 10.5px; color: #aaa; }
+    .kpi-sub b { color: #666; font-weight: 600; }
+
+    .channel-ribbon {
+      width: 260px;
+      flex-shrink: 0;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      background: #fafbfc;
+    }
+    .cr-title {
+      font-size: 10px; font-weight: 700; color: #bbb;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .stacked-bar {
+      height: 10px; border-radius: 5px;
+      display: flex; overflow: hidden; gap: 2px;
+    }
+    .sb-seg { border-radius: 3px; transition: opacity .15s; cursor: default; }
+    .sb-seg:hover { opacity: .8; }
+    .cr-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+    .cr-leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #555; }
+    .cr-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .expand-btn {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 12px;
+      border-left: 1px solid #f0f0f0;
+      cursor: pointer; color: #bbb; font-size: 12px;
+      transition: color .15s, background .15s;
+      background: none;
+      border-top: none; border-right: none; border-bottom: none;
+    }
+    .expand-btn:hover { color: #0057b8; background: #f7faff; }
+
+    /* expanded detail panel */
+    .opt-b-detail {
+      display: flex; gap: 12px;
+      margin-top: 8px;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #e4e8ed;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .detail-card {
+      flex: 1; background: #fafbfc; border-radius: 6px;
+      border: 1px solid #eee; padding: 10px 14px;
+    }
+    .dc-title { font-size: 10px; color: #bbb; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+    .dc-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; color: #555; border-bottom: 1px solid #f0f0f0; }
+    .dc-row:last-child { border-bottom: none; }
+    .dc-val { font-weight: 600; color: #333; }
+
+    .note { font-size: 11.5px; color: #888; margin-top: 8px; font-style: italic; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Option A ─────────────────────────────────── -->
+  <div class="section">
+    <div class="label-badge">Option A</div>
+    <h2>Accent Cards with Icons, Trends &amp; Hover Lift</h2>
+
+    <div class="opt-a">
+
+      <!-- Daily Calls -->
+      <div class="acard">
+        <div class="acard-accent ac-blue"></div>
+        <div class="acard-body">
+          <div class="acard-top">
+            <div class="acard-title">Daily Calls (Avg)</div>
+            <div class="acard-icon ai-blue">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="#0057b8"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            </div>
+          </div>
+          <div class="acard-num num-blue">4.8</div>
+          <div class="acard-trend">
+            <span class="trend-up">↑ 12%</span>
+            <span class="trend-label">vs previous period</span>
+          </div>
+          <div class="acard-sub">
+            <div class="asub"><span class="asub-l">Max</span><span class="asub-v">11</span></div>
+            <div class="asub"><span class="asub-l">Min</span><span class="asub-v">1</span></div>
+            <div class="asub"><span class="asub-l">Total</span><span class="asub-v">55</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avg Handle Time -->
+      <div class="acard">
+        <div class="acard-accent ac-green"></div>
+        <div class="acard-body">
+          <div class="acard-top">
+            <div class="acard-title">Avg Handle Time</div>
+            <div class="acard-icon ai-green">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="#2e7d32"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+            </div>
+          </div>
+          <div class="acard-num num-green">6m 2s</div>
+          <div class="acard-trend">
+            <span class="trend-down">↓ 8%</span>
+            <span class="trend-label">vs previous period</span>
+          </div>
+          <div class="acard-sub">
+            <div class="asub"><span class="asub-l">Longest</span><span class="asub-v">12m 0s</span></div>
+            <div class="asub"><span class="asub-l">Shortest</span><span class="asub-v">3s</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date Range -->
+      <div class="acard">
+        <div class="acard-accent ac-orange"></div>
+        <div class="acard-body">
+          <div class="acard-top">
+            <div class="acard-title">Date Range</div>
+            <div class="acard-icon ai-orange">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="#e65100"><path d="M20 3h-1V1h-2v2H7V1H5v2H4C2.9 3 2 3.9 2 5v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>
+            </div>
+          </div>
+          <div style="font-size:14px;font-weight:700;color:#e65100;line-height:1.3;margin-bottom:6px">
+            Feb 19 – May 19<br><span style="font-size:12px;color:#aaa;font-weight:400">2026</span>
+          </div>
+          <div class="acard-trend">
+            <span class="trend-label" style="font-size:12px;color:#777">Last 90 days</span>
+          </div>
+          <div class="acard-sub">
+            <div class="asub"><span class="asub-l">Days</span><span class="asub-v">90</span></div>
+            <div class="asub"><span class="asub-l">Segments</span><span class="asub-v">55</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Channel chart -->
+      <div class="chart-card-a">
+        <div class="acard-accent ac-purple"></div>
+        <div class="cca-top">
+          <div class="cca-title">Channel Distribution</div>
+        </div>
+        <div class="cca-body">
+          <div class="donut-wrap">
+            <canvas id="donutA" width="110" height="110"></canvas>
+            <div class="donut-center">
+              <div class="donut-num">55</div>
+              <div class="donut-lbl">total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <p class="note">Cards have colored top accent bars, relevant icons, trend vs. previous period, and a hover lift effect.</p>
+  </div>
+
+
+  <!-- ── Option B ─────────────────────────────────── -->
+  <div class="section">
+    <div class="label-badge">Option B</div>
+    <h2>Compact KPI Ribbon — saves vertical space for the table</h2>
+
+    <div class="opt-b">
+      <div class="kpi-tiles">
+
+        <div class="kpi-tile">
+          <div class="kpi-label">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            Total Segments
+          </div>
+          <div class="kpi-val">55</div>
+          <div class="kpi-sub">Last 90 days</div>
+        </div>
+
+        <div class="kpi-tile">
+          <div class="kpi-label">Daily Avg</div>
+          <div class="kpi-val">4.8</div>
+          <div class="kpi-sub"><b>Max</b> 11 &nbsp;·&nbsp; <b>Min</b> 1</div>
+        </div>
+
+        <div class="kpi-tile">
+          <div class="kpi-label">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+            Avg Duration
+          </div>
+          <div class="kpi-val">6m 2s</div>
+          <div class="kpi-sub"><b>Max</b> 12m 0s</div>
+        </div>
+
+        <div class="kpi-tile">
+          <div class="kpi-label">Inbound</div>
+          <div class="kpi-val" style="color:#E57373">31</div>
+          <div class="kpi-sub">56% of total</div>
+        </div>
+
+        <div class="kpi-tile" style="border-right:none">
+          <div class="kpi-label">Outbound</div>
+          <div class="kpi-val" style="color:#42A5F5">24</div>
+          <div class="kpi-sub">44% of total</div>
+        </div>
+
+      </div>
+
+      <!-- Channel stacked bar -->
+      <div class="channel-ribbon">
+        <div class="cr-title">Channel Mix</div>
+        <div class="stacked-bar">
+          <div class="sb-seg" style="width:38%;background:#7B5EA7" title="Voice 38%"></div>
+          <div class="sb-seg" style="width:27%;background:#43A047" title="Chat 27%"></div>
+          <div class="sb-seg" style="width:22%;background:#546E7A" title="Email 22%"></div>
+          <div class="sb-seg" style="width:13%;background:#00897B" title="SMS 13%"></div>
+        </div>
+        <div class="cr-legend">
+          <div class="cr-leg-item"><span class="cr-dot" style="background:#7B5EA7"></span>Voice 38%</div>
+          <div class="cr-leg-item"><span class="cr-dot" style="background:#43A047"></span>Chat 27%</div>
+          <div class="cr-leg-item"><span class="cr-dot" style="background:#546E7A"></span>Email 22%</div>
+          <div class="cr-leg-item"><span class="cr-dot" style="background:#00897B"></span>SMS 13%</div>
+        </div>
+      </div>
+
+      <button class="expand-btn" onclick="toggleDetail()" title="Show more">
+        <svg id="expandIcon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+    </div>
+
+    <!-- Expanded detail (hidden by default) -->
+    <div class="opt-b-detail" id="bDetail" style="display:none">
+      <div class="detail-card">
+        <div class="dc-title">Call Volume by Day</div>
+        <div class="dc-row"><span>Mon</span><span class="dc-val">8</span></div>
+        <div class="dc-row"><span>Tue</span><span class="dc-val">11</span></div>
+        <div class="dc-row"><span>Wed</span><span class="dc-val">6</span></div>
+        <div class="dc-row"><span>Thu</span><span class="dc-val">7</span></div>
+        <div class="dc-row"><span>Fri</span><span class="dc-val">9</span></div>
+      </div>
+      <div class="detail-card">
+        <div class="dc-title">Top Dispositions</div>
+        <div class="dc-row"><span>Issue Resolved</span><span class="dc-val">14</span></div>
+        <div class="dc-row"><span>Sale Completed</span><span class="dc-val">9</span></div>
+        <div class="dc-row"><span>Callback Requested</span><span class="dc-val">7</span></div>
+        <div class="dc-row"><span>Not Interested</span><span class="dc-val">5</span></div>
+        <div class="dc-row"><span>Left Voicemail</span><span class="dc-val">4</span></div>
+      </div>
+      <div class="detail-card">
+        <div class="dc-title">Duration Breakdown</div>
+        <div class="dc-row"><span>Under 1 min</span><span class="dc-val">12</span></div>
+        <div class="dc-row"><span>1–5 min</span><span class="dc-val">22</span></div>
+        <div class="dc-row"><span>5–10 min</span><span class="dc-val">14</span></div>
+        <div class="dc-row"><span>Over 10 min</span><span class="dc-val">7</span></div>
+      </div>
+    </div>
+
+    <p class="note">Single slim ribbon — ~40% less vertical space. Click ▾ to expand a detail panel with extra breakdowns.</p>
+  </div>
+
+  <script>
+    // Donut chart for Option A
+    new Chart(document.getElementById('donutA'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Voice','Chat','Email','SMS'],
+        datasets: [{
+          data: [21, 15, 12, 7],
+          backgroundColor: ['#7B5EA7','#43A047','#546E7A','#00897B'],
+          borderWidth: 3, borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}` } }
+        },
+        cutout: '62%'
+      }
+    });
+
+    // Option B expand toggle
+    function toggleDetail(){
+      const d = document.getElementById('bDetail');
+      const icon = document.getElementById('expandIcon');
+      const open = d.style.display === 'flex';
+      d.style.display = open ? 'none' : 'flex';
+      icon.innerHTML = open
+        ? '<path d="M7 10l5 5 5-5z"/>'
+        : '<path d="M7 14l5-5 5 5z"/>';
+    }
+  </script>
+</body>
+</html>
