@@ -3908,9 +3908,14 @@ function renderHistoryTab(c){
   renderTabBar('history');
   const chCol={voice:'#126bce',email:'#6b7280',chat:'#00bfa6',livechat:'#00bfa6',
     whatsapp:'#25d366',portal:'#556cd6',callback:'#126bce',social:'#e754a8',mobile:'#ffb800',auto:'#9ca3af'};
+  const chFA={voice:'fa-phone',email:'fa-envelope',chat:'fa-comments',livechat:'fa-comments',
+    whatsapp:'fa-whatsapp',portal:'fa-globe',callback:'fa-phone-volume',social:'fa-hashtag',
+    mobile:'fa-sms',auto:'fa-robot',default:'fa-headset'};
   const visibleNodes = window._transcriptDone ? c.nodes : c.nodes.slice(0, c.nodes.length - 1);
   const nodes=visibleNodes.map((n,i)=>{
     const col=chCol[n.ch]||'#126bce';
+    const fa=chFA[n.ch]||chFA.default;
+    const iconHtml=`<i class="fas ${fa}" style="font-size:13px"></i>`;
     const csat=n.csat?`<span class="tl-csat c${n.csat}">CSAT ${n.csat}/5</span>`:'';
     const esc=n.esc?'<span class="esc-tag">↑ ESC</span>':'';
     const issues=detectIssues(n);
@@ -3919,7 +3924,7 @@ function renderHistoryTab(c){
       return `<span class="issue-chip ${issueClass(t)}" onclick="event.stopPropagation();toggleIssueFilter('${safe}')">${t}</span>`;
     }).join('');
     return `<div class="tl-node" id="hn${i}" data-issues="${issues.join('|')}" onclick="openDrawer(${i})">
-      <div class="tl-ic" style="border-color:${col};color:${col}">${n.icon}</div>
+      <div class="tl-ic" style="border-color:${col};color:${col}">${iconHtml}</div>
       <div class="tl-body">
         <div class="tl-top"><div class="tl-ttl">${n.ttl}</div><div class="tl-dt">${n.dt}</div></div>
         <div class="tl-ag">${n.ag}</div>
