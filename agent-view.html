@@ -499,7 +499,25 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
   width:0%;transition:width .8s ease;}
 .act-btn-done{display:inline-flex;align-items:center;gap:5px;margin-top:6px;
   padding:5px 12px;border-radius:var(--r-full);font-size:11px;font-weight:600;
-  background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd);cursor:default;}
+  background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd);cursor:pointer;}
+.act-btn-done:hover{filter:brightness(.95);}
+/* ── TOAST ── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--n800);color:#fff;
+  border-radius:var(--r-md);font-size:12px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);
+  pointer-events:all;opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast-icon{font-size:14px;flex-shrink:0;}
+.toast-body{flex:1;}
+.toast-title{font-weight:700;font-size:12px;margin-bottom:2px;}
+.toast-sub{font-size:11px;color:rgba(255,255,255,.65);}
+.toast-close{background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;font-size:14px;padding:0;margin-left:4px;}
+.toast-close:hover{color:#fff;}
+
+.act-counter{margin-left:auto;display:inline-flex;align-items:center;gap:4px;
+  background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd);
+  border-radius:var(--r-full);font-size:10px;font-weight:700;padding:2px 8px;}
+.act-counter i{font-size:9px;}
 
 /* Allow chips to wrap naturally */
 .issue-chips{flex-wrap:wrap;overflow:visible;max-height:none;}
@@ -622,6 +640,7 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 
 <!-- DRAWER -->
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div id="toast-container"></div>
 <div class="drawer" id="drawer">
   <div class="dr-hdr">
     <div class="dr-ic" id="dr-ic">📞</div>
@@ -3975,7 +3994,7 @@ function renderHistoryTab(c){
           <table class="pat-tbl">${pats}</table>
         </div>
         <div class="brief-card">
-          <div class="brief-hdr"><i class="fas fa-tasks"></i>Recommended Actions</div>
+          <div class="brief-hdr"><i class="fas fa-tasks"></i>Recommended Actions<span class="act-counter" id="act-counter" style="display:none"></span></div>
           ${acts}
         </div>
       </div>
@@ -3986,7 +4005,7 @@ function renderHistoryTab(c){
     document.querySelectorAll('[data-idx]').forEach(btn=>{
       btn.addEventListener('click', function(){
         createTask(parseInt(this.dataset.idx), this);
-      });
+      }, {once: true});
     });
   });
 }
@@ -4216,18 +4235,46 @@ function createTask(idx, btn) {
   card.style.display = 'block';
   renderTaskCard(card, tid, assignee, dueStr, 'pending', 10);
 
-  // → In Progress after 1.8s
+  // → In Progress after 1s
   setTimeout(() => {
     renderTaskCard(card, tid, assignee, dueStr, 'inprogress', 55);
-  }, 1800);
+  }, 1000);
 
-  // → Done after 4.5s
+  // → Done after 2.5s
   setTimeout(() => {
     renderTaskCard(card, tid, assignee, dueStr, 'done', 100);
-    // Swap button to "View Task"
-    btn.innerHTML = '<i class="fas fa-external-link-alt"></i> View Task';
+    btn.removeAttribute('style');
     btn.className = 'act-btn-done';
-  }, 4500);
+    btn.innerHTML = '<i class="fas fa-external-link-alt"></i> View Task';
+    btn.addEventListener('click', function() { showToast(tid, assignee, label); }, {once: true});
+    // Update counter badge
+    var counter = document.getElementById('act-counter');
+    if (counter) {
+      var current = parseInt(counter.dataset.count || '0') + 1;
+      var total = document.querySelectorAll('[data-idx]').length;
+      counter.dataset.count = current;
+      counter.style.display = 'inline-flex';
+      counter.innerHTML = '<i class="fas fa-check-circle"></i> ' + current + ' of ' + total + ' automated';
+    }
+  }, 2500);
+}
+
+function showToast(tid, assignee, label) {
+  var icons = {'Send':'fa-envelope','Assign':'fa-user-plus','Take action':'fa-bolt','Activate':'fa-bolt','default':'fa-tasks'};
+  var icon = icons[label] || icons['default'];
+  var container = document.getElementById('toast-container');
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML =
+    '<div class="toast-icon"><i class="fas ' + icon + '" style="color:#60a5fa"></i></div>' +
+    '<div class="toast-body">' +
+      '<div class="toast-title">Opening ' + tid + ' in CRM</div>' +
+      '<div class="toast-sub">Assigned to ' + assignee.name + ' · ' + assignee.role + '</div>' +
+    '</div>' +
+    '<button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>';
+  container.appendChild(t);
+  requestAnimationFrame(() => { requestAnimationFrame(() => { t.classList.add('show'); }); });
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 4000);
 }
 
 function renderTaskCard(card, tid, assignee, due, status, progress) {
