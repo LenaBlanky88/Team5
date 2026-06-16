@@ -239,22 +239,24 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
   letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
 .risk-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;
   border-radius:var(--r-full);font-size:11px;font-weight:700;margin-bottom:12px;}
-.tl-node{display:flex;gap:10px;padding:8px;border-radius:var(--r-sm);cursor:pointer;
+.tl-node{display:flex;gap:12px;padding:12px 10px;border-radius:var(--r-md);cursor:pointer;
   transition:all .18s;position:relative;margin-bottom:1px;}
-.tl-node:hover{background:var(--n50);}
-.tl-node.sel{background:var(--p50);outline:1.5px solid var(--p200);}
-.tl-node:not(:last-child)::after{content:'';position:absolute;left:23px;top:38px;
+.tl-node{border:1px solid var(--n100);margin-bottom:6px;background:var(--n0);}
+.tl-node:hover{background:var(--n25);border-color:var(--n200);}
+.tl-node.sel{background:var(--p50);border-color:var(--p200);outline:none;}
+.tl-node:not(:last-child)::after{content:'';position:absolute;left:31px;top:60px;
   width:2px;height:calc(100% - 12px);background:var(--n100);z-index:0;}
-.tl-ic{width:30px;height:30px;border-radius:50%;border:2px solid var(--n100);
+.tl-ic{width:36px;height:36px;border-radius:50%;border:2px solid var(--n100);
   background:var(--n0);display:flex;align-items:center;justify-content:center;
   font-size:12px;flex-shrink:0;z-index:1;position:relative;}
 .tl-body{flex:1;min-width:0;}
-.tl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;}
-.tl-ttl{font-size:11px;font-weight:600;color:var(--n700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tl-dt{font-size:9px;color:var(--n400);white-space:nowrap;margin-left:4px;flex-shrink:0;}
-.tl-ag{font-size:10px;color:var(--n400);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px;}
-.tl-foot{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
-.tl-csat{font-size:9px;padding:1px 5px;border-radius:var(--r-full);font-weight:700;}
+.tl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.tl-ttl{font-size:12px;font-weight:600;color:var(--n700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tl-dt{font-size:10px;color:var(--n400);white-space:nowrap;margin-left:6px;flex-shrink:0;}
+.tl-ag{font-size:11px;color:var(--n400);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:6px;}
+.tl-foot{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px;}
+.tl-foot .sent-ico{width:18px;height:18px;border-radius:4px;}
+.tl-csat{font-size:10px;padding:2px 7px;border-radius:var(--r-full);font-weight:600;}
 .c1{background:var(--err-bg);color:var(--err);}
 .c2{background:var(--warn-bg);color:#856404;}
 .c3{background:#fffde7;color:#795b00;}
@@ -391,8 +393,8 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 .pw-desc{font-size:11px;color:var(--n500);line-height:1.4;}
 
 /* ── ISSUE CHIPS PER NODE (Journey timeline) ── */
-.issue-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
-.issue-chip{font-size:9px;font-weight:700;padding:2px 6px;border-radius:var(--r-xs);
+.issue-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;}
+.issue-chip{font-size:10px;font-weight:500;padding:3px 9px;border-radius:var(--r-full);
   cursor:pointer;border:1px solid transparent;line-height:1.4;transition:filter .15s;}
 .issue-chip:hover{filter:brightness(.92);}
 .issue-chip.active{outline:1.5px solid currentColor;outline-offset:1px;}
@@ -447,6 +449,93 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 /* ── SENTIMENT ICON ── */
 .sent-ico{width:16px;height:16px;display:inline-block;vertical-align:middle;flex-shrink:0;}
 .dr-mv .sent-ico{width:18px;height:18px;margin-right:4px;}
+
+/* ── PROFESSIONALISM OVERRIDES ── */
+
+/* Failure pattern count badges: red only for critical, others muted */
+.pat-count{background:var(--n400)!important;font-size:11px;}
+.pat-count.sev-r{background:var(--err)!important;}
+.pat-count.sev-o{background:var(--n300)!important;}
+
+/* Pattern pills in Voice tab: softer, border-only style */
+.pat-pill.sev-r{background:transparent;color:var(--err);border-color:#fca5a5;}
+.pat-pill.sev-o{background:transparent;color:#92400e;border-color:#fcd34d;}
+
+/* Issue chips in timeline: all neutral grey, broken-promise gets a red dot via ::before */
+.issue-chip{font-weight:500;background:var(--n50);color:var(--n500);border-color:var(--n200);}
+.ic-broken-promise{background:var(--n50);color:var(--n700);border-color:var(--n200);font-weight:500;}
+.ic-broken-promise::before{background:var(--err)!important;}
+.ic-broken-promise::before{content:'';display:inline-block;width:5px;height:5px;
+  border-radius:50%;background:var(--err);margin-right:4px;vertical-align:1px;}
+.ic-sla-breach{background:var(--n50);color:var(--n500);border-color:var(--n200);}
+.ic-ownership-gap{background:var(--n50);color:var(--n500);border-color:var(--n200);}
+.ic-repeat-contact{background:var(--n50);color:var(--n500);border-color:var(--n200);}
+.ic-routing-failure{background:var(--n50);color:var(--n500);border-color:var(--n200);}
+.ic-inconsistent-information{background:var(--n50);color:var(--n500);border-color:var(--n200);}
+
+/* ── TASK AUTOMATION CARDS ── */
+.task-card{margin-top:8px;border:1px solid var(--n100);border-radius:var(--r-md);
+  background:var(--n25);overflow:hidden;animation:taskIn .3s ease;}
+@keyframes taskIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.task-hdr{display:flex;align-items:center;gap:8px;padding:8px 12px;
+  background:var(--n0);border-bottom:1px solid var(--n100);}
+.task-id{font-size:10px;font-weight:700;color:var(--p600);font-family:monospace;}
+.task-status{margin-left:auto;display:flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:600;padding:2px 8px;border-radius:var(--r-full);}
+.ts-pending{background:#fff6e0;color:#92400e;}
+.ts-inprogress{background:var(--p50);color:var(--p600);}
+.ts-done{background:var(--ok-bg);color:var(--ok);}
+.task-status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.ts-pending .task-status-dot{background:#ffb800;animation:pulse 1.4s infinite;}
+.ts-inprogress .task-status-dot{background:var(--p400);animation:pulse 1.4s infinite;}
+.ts-done .task-status-dot{background:var(--ok);}
+.task-body{padding:8px 12px;}
+.task-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--n600);margin-bottom:4px;}
+.task-row:last-child{margin-bottom:0;}
+.task-row i{width:14px;text-align:center;color:var(--n400);font-size:10px;flex-shrink:0;}
+.task-row strong{color:var(--n700);}
+.task-progress{height:3px;background:var(--n100);border-radius:var(--r-full);margin:8px 12px 8px;}
+.task-progress-bar{height:100%;border-radius:var(--r-full);background:var(--p400);
+  width:0%;transition:width .8s ease;}
+.act-btn-done{display:inline-flex;align-items:center;gap:5px;margin-top:6px;
+  padding:5px 12px;border-radius:var(--r-full);font-size:11px;font-weight:600;
+  background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd);cursor:default;}
+
+/* Allow chips to wrap naturally */
+.issue-chips{flex-wrap:wrap;overflow:visible;max-height:none;}
+
+/* Timeline highlighted nodes: elevated card with amber accent */
+.tl-node.hl{
+  outline:none!important;
+  border-left:4px solid var(--warn);
+  padding-left:6px;
+  background:var(--n0);
+  box-shadow:0 2px 8px rgba(0,0,0,.1), 0 0 0 1px rgba(255,184,0,.25);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  position:relative;z-index:1;
+}
+/* Dimmed nodes: clearly faded */
+.tl-node.dim{opacity:.2!important;filter:grayscale(1)!important;}
+
+/* ESC tag: border-only, less aggressive */
+.esc-tag{background:transparent;color:var(--err);border:1px solid #fca5a5;font-weight:600;}
+
+/* CSAT badges: text only, no fill */
+.c1{background:transparent;color:var(--err);border:1px solid #fca5a5;}
+.c2{background:transparent;color:#92400e;border:1px solid #fcd34d;}
+
+/* Recommended Actions priority label: inline subdued tag, not all-caps red block */
+.act-pri{text-transform:none;font-weight:600;font-size:10px;letter-spacing:0;}
+.pri-critical{background:transparent;color:var(--err);border:none;padding:0;}
+.pri-critical::before{content:'● ';font-size:8px;}
+.pri-high{background:transparent;color:#92400e;border:none;padding:0;}
+.pri-high::before{content:'● ';font-size:8px;}
+.pri-medium{background:transparent;color:#795b00;border:none;padding:0;}
+.pri-medium::before{content:'● ';font-size:8px;}
+
+/* Pat alert (Voice tab): remove heavy left border on non-critical */
+.pat-alert{border-left-color:var(--n200);}
+.pat-alert.sev-red{border-left-color:var(--err);}
 </style>
 </head>
 <body>
@@ -3839,7 +3928,8 @@ function renderHistoryTab(c){
       <div class="act-body">
         <span class="act-pri pri-${a.pri.toLowerCase()}">${a.pri}</span>
         <div class="act-txt">${a.txt}</div>
-        <button class="act-btn ${b.cls}"><i class="fas ${b.ic}"></i>${b.lbl}</button>
+        <button class="act-btn ${b.cls}" id="act-btn-${i}" data-lbl="${b.lbl}" data-idx="${i}"><i class="fas ${b.ic}"></i>${b.lbl}</button>
+        <div class="task-card" id="task-card-${i}" style="display:none"></div>
       </div>
     </div>`;
   }).join('');
@@ -3893,6 +3983,11 @@ function renderHistoryTab(c){
   requestAnimationFrame(()=>{
     const fg=document.getElementById('score-fg');
     if(fg){fg.style.strokeDasharray=circ;fg.style.strokeDashoffset=offset;}
+    document.querySelectorAll('[data-idx]').forEach(btn=>{
+      btn.addEventListener('click', function(){
+        createTask(parseInt(this.dataset.idx), this);
+      });
+    });
   });
 }
 
@@ -4088,6 +4183,74 @@ function closeDrawer(){
   document.getElementById('overlay').classList.remove('on');
   document.getElementById('drawer').classList.remove('on');
   document.querySelectorAll('.tl-node').forEach(el=>el.classList.remove('sel'));
+}
+
+/* ── TASK AUTOMATION ── */
+function createTask(idx, btn) {
+  var assignees = {
+    'Send':        {name:'Email Bot',    role:'Automated Notification',  avatar:'🤖'},
+    'Assign':      {name:'Team Lead',    role:'Case Ownership Queue',    avatar:'👤'},
+    'Take action': {name:'Supervisor',   role:'Escalation Manager',      avatar:'👔'},
+    'Activate':    {name:'CRM Bot',      role:'Workflow Automation',     avatar:'⚡'},
+    'default':     {name:'Agent Queue',  role:'Manual Review',           avatar:'📋'},
+  };
+  var label = btn.dataset.lbl || 'Take action';
+  var card = document.getElementById('task-card-' + idx);
+  if (!card) return;
+
+  // Generate task ID
+  var prefix = label === 'Send' ? 'EMAIL' : label === 'Assign' ? 'CASE' : 'TASK';
+  var tid = prefix + '-' + Math.floor(1000 + Math.random() * 9000);
+  var assignee = assignees[label] || assignees['default'];
+  var now = new Date();
+  var due = new Date(now.getTime() + (label === 'Send' ? 2 : label === 'Assign' ? 24 : 48) * 3600000);
+  var dueStr = due.toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+
+  // Disable button, show created state
+  btn.innerHTML = '<i class="fas fa-check"></i> Created';
+  btn.style.background = '#6b7280';
+  btn.style.cursor = 'default';
+  btn.onclick = null;
+
+  // Render task card — Pending
+  card.style.display = 'block';
+  renderTaskCard(card, tid, assignee, dueStr, 'pending', 10);
+
+  // → In Progress after 1.8s
+  setTimeout(() => {
+    renderTaskCard(card, tid, assignee, dueStr, 'inprogress', 55);
+  }, 1800);
+
+  // → Done after 4.5s
+  setTimeout(() => {
+    renderTaskCard(card, tid, assignee, dueStr, 'done', 100);
+    // Swap button to "View Task"
+    btn.innerHTML = '<i class="fas fa-external-link-alt"></i> View Task';
+    btn.className = 'act-btn-done';
+  }, 4500);
+}
+
+function renderTaskCard(card, tid, assignee, due, status, progress) {
+  const statusMap = {
+    pending:    {cls:'ts-pending',    lbl:'Pending'},
+    inprogress: {cls:'ts-inprogress', lbl:'In Progress'},
+    done:       {cls:'ts-done',       lbl:'Completed'},
+  };
+  const s = statusMap[status];
+  card.innerHTML = `
+    <div class="task-hdr">
+      <i class="fas fa-tasks" style="color:var(--p400);font-size:11px"></i>
+      <span class="task-id">${tid}</span>
+      <div class="task-status ${s.cls}">
+        <div class="task-status-dot"></div>${s.lbl}
+      </div>
+    </div>
+    <div class="task-progress"><div class="task-progress-bar" style="width:${progress}%"></div></div>
+    <div class="task-body">
+      <div class="task-row"><i class="fas fa-user-circle"></i><span>${assignee.avatar} <strong>${assignee.name}</strong> — ${assignee.role}</span></div>
+      <div class="task-row"><i class="fas fa-clock"></i><span>Due: <strong>${due}</strong></span></div>
+      <div class="task-row"><i class="fas fa-bell"></i><span>${status === 'done' ? '✅ Notification sent to assignee' : status === 'inprogress' ? '🔄 Assignee notified, working on it…' : '⏳ Queuing task for assignment…'}</span></div>
+    </div>`;
 }
 
 </script>
