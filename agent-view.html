@@ -41,6 +41,28 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
   border:1px solid rgba(36,148,62,.35);border-radius:var(--r-sm);
   padding:4px 12px;color:#6ee2a0;font-size:11px;font-weight:600;}
 .in-call-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pulse 1.6s infinite;}
+.in-call.ended{background:rgba(180,30,30,.15);border-color:rgba(200,40,40,.3);color:#e57373;}
+.in-call.ended .in-call-dot{background:#e57373;animation:none;}
+.pat-alert{display:flex;align-items:center;gap:10px;background:#fff8f0;border:1px solid #f5c07a;
+  border-left:3px solid #e67e22;border-radius:6px;padding:10px 12px;margin:6px 0 2px;
+  cursor:pointer;transition:background .15s;animation:fadeSlideIn .35s ease;}
+.pat-alert.sev-red{background:#fff5f5;border-color:#f5b7b1;border-left-color:#c0392b;}
+.pat-alert.sev-yellow{background:#fffdf0;border-color:#f9e79f;border-left-color:#d4ac0d;}
+.pat-alert:hover{filter:brightness(.97);}
+.pat-alert-icon{font-size:15px;flex-shrink:0;}
+.pat-alert-body{flex:1;min-width:0;}
+.pat-alert-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  color:#922b21;margin-bottom:2px;}
+.pat-alert.sev-yellow .pat-alert-lbl{color:#9a7d0a;}
+.pat-alert.sev-orange .pat-alert-lbl{color:#935116;}
+.pat-alert-msg{font-size:11px;color:var(--n600);line-height:1.35;}
+.pat-alert-cta{font-size:10px;font-weight:600;color:var(--p400);white-space:nowrap;
+  flex-shrink:0;padding-left:6px;}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.tl-pending{display:flex;align-items:center;gap:10px;padding:24px 16px;font-size:12px;
+  color:var(--n400);font-style:italic;}
+.tl-pending-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);
+  animation:pulse 1.4s infinite;flex-shrink:0;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.75);}}
 .hdr-av{width:30px;height:30px;border-radius:50%;background:var(--p600);
   color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
@@ -120,6 +142,58 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 .m-tab:hover{color:var(--n600);}
 .m-tab.active{color:var(--p500);border-bottom-color:var(--p500);font-weight:600;}
 .tab-content{flex:1;overflow-y:auto;padding:16px 20px;}
+/* ── CHAT INPUT BAR ── */
+.body-wrap{flex:1;display:flex;overflow:hidden;}
+.main-col{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.chat-bar{flex-shrink:0;background:var(--n0);border-top:1px solid var(--n100);padding:10px 16px;}
+.chat-bar-inner{display:flex;align-items:center;gap:8px;background:var(--n0);
+  border:1.5px solid var(--n200);border-radius:var(--r-lg);padding:8px 10px 8px 14px;
+  box-shadow:var(--sh-sm);transition:border-color .18s;}
+.chat-bar-inner:focus-within{border-color:var(--p400);box-shadow:0 0 0 3px rgba(48,143,248,.12);}
+.chat-bar-add{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--n300);
+  background:transparent;color:var(--n400);display:flex;align-items:center;justify-content:center;
+  font-size:11px;cursor:pointer;flex-shrink:0;transition:all .15s;}
+.chat-bar-add:hover{border-color:var(--p400);color:var(--p500);}
+.chat-bar-input{flex:1;border:none;outline:none;font-family:inherit;font-size:13px;
+  color:var(--n800);background:transparent;resize:none;min-height:20px;max-height:80px;line-height:1.5;}
+.chat-bar-input::placeholder{color:var(--n300);}
+.chat-bar-send{width:32px;height:32px;border-radius:50%;background:var(--p500);
+  border:none;color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:13px;cursor:pointer;flex-shrink:0;transition:background .15s;}
+.chat-bar-send:hover{background:var(--p600);}
+/* ── REALTIME TRANSCRIPT PANEL ── */
+.transcript-panel{width:260px;flex-shrink:0;background:var(--n0);border-left:1px solid var(--n100);
+  display:flex;flex-direction:column;overflow:hidden;transition:width .25s ease;}
+.transcript-panel.hidden{width:0;border:none;overflow:hidden;}
+.tr-hdr{padding:10px 14px 8px;border-bottom:1px solid var(--n100);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tr-hdr-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--n500);flex:1;white-space:nowrap;}
+.tr-hdr-name{font-size:10px;color:var(--n400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;}
+.tr-live{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--ok);white-space:nowrap;flex-shrink:0;}
+.tr-live-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:pulse 1.4s infinite;flex-shrink:0;}
+.tr-close{width:20px;height:20px;border:none;background:transparent;color:var(--n300);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;border-radius:var(--r-xs);}
+.tr-close:hover{background:var(--n50);color:var(--n600);}
+.tr-scroll{flex:1;overflow-y:auto;padding:12px 12px 8px;}
+.tr-entry{margin-bottom:10px;}
+.tr-speaker{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--n400);margin-bottom:3px;display:flex;align-items:center;gap:5px;}
+.tr-speaker.cust-sp{color:var(--p500);}
+.tr-ts{font-size:9px;color:var(--n300);font-weight:400;text-transform:none;letter-spacing:0;}
+.tr-bubble{background:var(--n25);border:1px solid var(--n100);border-radius:var(--r-sm);padding:7px 10px;font-size:12px;color:var(--n700);line-height:1.55;}
+.tr-bubble.cust{background:var(--p50);border-color:var(--p100);}
+.tr-bubble.typing{display:flex;align-items:center;gap:3px;padding:9px 12px;}
+.tr-dot{width:5px;height:5px;border-radius:50%;background:var(--n300);animation:tr-bounce .9s infinite;}
+.tr-dot:nth-child(2){animation-delay:.15s;}
+.tr-dot:nth-child(3){animation-delay:.3s;}
+@keyframes tr-bounce{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-4px);}}
+.tr-node-divider{margin:10px 0 8px;padding:6px 8px 6px 10px;background:var(--n25);border-left:3px solid var(--p400);border-radius:0 var(--r-sm) var(--r-sm) 0;}
+.tr-node-seq{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--p500);margin-bottom:3px;}
+.tr-node-ttl{font-size:11px;font-weight:600;color:var(--n700);line-height:1.3;margin-bottom:5px;}
+.tr-patterns{display:flex;flex-wrap:wrap;gap:4px;}
+.tr-pat{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;border:1px solid;}
+.tr-pat.sev-red{color:#c0392b;background:#fdf0ef;border-color:#f5b7b1;}
+.tr-pat.sev-orange{color:#d35400;background:#fef5ec;border-color:#fad7a0;}
+.tr-pat.sev-yellow{color:#9a7d0a;background:#fefdf0;border-color:#f9e79f;}
+
 
 /* Voice tab */
 .conv-lbl{font-size:10px;font-weight:700;color:var(--n400);text-transform:uppercase;
@@ -429,10 +503,30 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
     </div>
   </div>
 
-  <!-- MAIN -->
-  <div class="main">
-    <div class="tab-bar" id="tab-bar"></div>
-    <div class="tab-content" id="tab-content"></div>
+  <!-- MAIN + TRANSCRIPT WRAPPER -->
+  <div class="body-wrap">
+    <div class="main-col">
+      <div class="tab-bar" id="tab-bar"></div>
+      <div class="tab-content" id="tab-content"></div>
+      <div class="chat-bar" id="chat-bar" style="display:none">
+        <div class="chat-bar-inner">
+          <button class="chat-bar-add" title="Attach"><i class="fas fa-plus"></i></button>
+          <textarea class="chat-bar-input" id="chat-input" rows="1" placeholder="Type a message…" oninput="autoResizeChatInput(this)" onkeydown="chatSendOnEnter(event)"></textarea>
+          <button class="chat-bar-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="transcript-panel hidden" id="transcript-panel">
+      <div class="tr-hdr">
+        <div style="flex:1;min-width:0;">
+          <div class="tr-hdr-title">Call Transcript</div>
+          <div class="tr-hdr-name" id="tr-hdr-name">—</div>
+        </div>
+        <div class="tr-live"><div class="tr-live-dot"></div>LIVE</div>
+        <button class="tr-close" onclick="closeTranscript()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="tr-scroll" id="tr-scroll"></div>
+    </div>
   </div>
 
 </div>
@@ -458,290 +552,353 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 <script>
 const CASES=[
   {
-    "key": "MC-BILL-NM-887241",
-    "name": "Rachel Torres",
-    "init": "RT",
-    "id": "CUST-MOB-44822",
-    "ref": "ACC-NM-887241",
-    "industry": "Telecom",
-    "iEmoji": "📱",
-    "prod": "NovaMax Unlimited Premium",
-    "scenario": "The Bill That Nobody Fixed — And the Hotspot That Kept Breaking",
-    "score": 7.8,
-    "label": "HIGH CHURN RISK",
-    "col": "#ffb800",
-    "status": "Resolved",
-    "totalInts": 7,
-    "lastCh": "Callback",
-    "internalNote": "Rachel Torres has contacted Telecom support <strong>7 times</strong> regarding: <strong>The Bill That Nobody Fixed — And the Hotspot That Kept Breaking</strong>. Most recent contact via <strong>Callback</strong>. The billing dispute stemmed from a known system miscategorisation on Unlimited Premium accounts. The first agent raised no ticket; the second routed TKT-MOB-330291 to the wrong queue where it sat for 15 days. In parallel, a recurring provisioning flag broke her hotspot twice before a permanent network-level fix was applied.",
+    "key": "MC-CLM-SL-220648",
+    "name": "Jennifer Torres",
+    "init": "JT",
+    "id": "CUST-INS-78812",
+    "ref": "CLM-SL-220648",
+    "industry": "Insurance",
+    "iEmoji": "🏠",
+    "prod": "Homeowner's Insurance — Premium Plan",
+    "scenario": "Delayed Claim - Customer Chasing Answers for 5 Weeks",
+    "score": 9.7,
+    "label": "CRITICAL CHURN RISK",
+    "col": "#e32926",
+    "status": "Unresolved",
+    "totalInts": 8,
+    "lastCh": "Voice — Claims Manager",
+    "internalNote": "Jennifer Torres has contacted SecureLife <strong>8 times</strong> over <strong>41 days</strong> regarding claim <strong>CLM-SL-220648</strong> (water damage — burst pipe, $24,300). Adjuster Rachel Kim completed her desktop review on April 10 — 9 days after filing — but the outbound notification was routed to a decommissioned email alias and Jennifer was never told. Three separate callback promises were broken (April 8, April 16, April 22). Two unlinked escalation tickets exist in the CRM. Settlement of $22,800 verbally authorized by Claims Manager Patricia Voss on May 12 but not yet paid. Churn language explicit.",
     "snapshotBullets": [
-      "Telecom customer · NovaMax Unlimited Premium · CUST-MOB-44822",
-      "Platinum Member · 6-year relationship",
-      "Two parallel issues: $38.50 disputed billing + recurring hotspot failure",
-      "Ticket TKT-MOB-330291 sat in wrong queue 15 days",
-      "Last contact via Senior Advisor Callback · resolved with 15% retention offer"
+      "SecureLife Insurance · Homeowner's Premium Plan · CUST-INS-78812",
+      "Platinum Member · 20-year relationship",
+      "Claim CLM-SL-220648 — Water Damage (Burst Pipe) — $24,300 estimated loss",
+      "Adjuster decision made April 10 — never communicated for 12 days",
+      "3 broken callback promises · 2 unlinked escalation tickets · settlement unpaid"
     ],
     "openingLines": [
       {
-        "q": "I can see you've had two separate issues open for nearly a month — I'm taking ownership of both today.",
-        "hint": "cross-issue accountability in one breath"
+        "q": "Jennifer, I've read every interaction on this claim. I understand the adjuster's decision was made on April 10 and never reached you — I'm sorry, and I'm fixing that right now.",
+        "hint": "names the core failure immediately and takes ownership"
       },
       {
-        "q": "A 48-hour callback was promised on May 7. That commitment wasn't kept — I'm here to fix that.",
-        "hint": "names the broken promise explicitly"
+        "q": "Three callbacks were promised and none were kept. I'm not going to promise another — I'm going to resolve this on this call.",
+        "hint": "acknowledges broken trust without making a new empty promise"
       },
       {
-        "q": "You're a Platinum customer of 6 years. Let me confirm both fixes are in place before we end this call.",
-        "hint": "anchors on tenure and tangible outcome"
+        "q": "You've been a Platinum customer for 20 years and this was your first claim. What happened here is not acceptable — let me walk you through the settlement right now.",
+        "hint": "anchors on loyalty and moves to concrete action"
       }
     ],
     "transcript": [
       {
-        "sp": "agent",
-        "nm": "Dominic",
-        "tx": "Rachel, this is Dominic Carr, Senior Customer Relations at NovaMobile. I've been assigned to your account personally."
+        "sp": "cust",
+        "nm": "Jennifer",
+        "tx": "This is my eighth call. Six weeks. Three broken callback promises. I just want to know the status of my claim."
       },
       {
         "sp": "agent",
-        "nm": "Dominic",
-        "tx": "I've verified a $38.50 credit has been applied. The hotspot has been permanently resolved at the network level."
+        "nm": "Natalie",
+        "tx": "Jennifer, I've read the full record. I'm escalating to my manager Patricia Voss right now — not a callback, an actual supervisor on this call."
+      },
+      {
+        "sp": "agent",
+        "nm": "Patricia",
+        "tx": "Jennifer, this is Patricia Voss, Claims Manager. I'm authorizing the $22,800 settlement today plus a goodwill payment for your out-of-pocket emergency costs."
       },
       {
         "sp": "cust",
-        "nm": "Rachel",
-        "tx": "I appreciate you saying that. I've been a customer for six years and I've had to fight to get basic things fixed."
+        "nm": "Jennifer",
+        "tx": "I've been paying premiums for twenty years and never filed a claim. I had to fight for six weeks just to get here."
       }
     ],
     "sentimentTrend": [
-      "slightly-neg",
+      "neutral",
       "neg",
       "neg",
-      "pos",
       "very-neg",
       "very-neg",
-      "pos"
+      "very-neg",
+      "very-neg",
+      "very-neg"
     ],
     "nodes": [
       {
         "seq": 1,
-        "ch": "voice",
-        "icon": "📞",
-        "chNm": "Phone Call",
-        "ttl": "Phone Call — Billing Dispute Raised",
-        "dt": "2026-05-01",
-        "ag": "Daniel Hurst",
-        "sent": "slightly-neg",
-        "sEmoji": "😕",
-        "csat": 3,
+        "ch": "email",
+        "icon": "📧",
+        "chNm": "Email / Online Portal",
+        "ttl": "Claim Filed — Auto-Acknowledged, No Adjuster Assigned",
+        "dt": "2026-04-01",
+        "ag": "SecureLife Claims Portal (Automated)",
+        "sent": "neutral",
+        "sEmoji": "😐",
+        "csat": null,
         "esc": false,
-        "dur": "13 min",
+        "dur": "6 min",
+        "issues": ["Ownership Gap"],
         "lines": [
-          {"sp":"cust","nm":"Rachel","tx":"Hi. I'm calling about my latest bill. I've been charged $38.50 for data overages, but I'm on the Unlimited Premium plan. That shouldn't be possible."},
-          {"sp":"agent","nm":"Daniel","tx":"The charge was applied April 30th, labelled as a domestic data overage. That does look unusual for your plan."},
-          {"sp":"cust","nm":"Rachel","tx":"I've had this plan for three years and never been charged for overages."},
-          {"sp":"agent","nm":"Daniel","tx":"Let me look into this further on my end and get back to you. I'll make a note on your account."},
-          {"sp":"cust","nm":"Rachel","tx":"It would be helpful if someone called me. I'd rather not have to chase this."}
+          {"sp":"cust","nm":"Jennifer","tx":"I am writing to file a claim under my Homeowner's Insurance Policy POL-SL-334821. On March 31 a pipe burst in my kitchen. Water spread through the kitchen floor, hallway, and storage room. My contractor estimates repair costs at approximately $24,000–$25,000."},
+          {"sp":"agent","nm":"SecureLife Portal","tx":"Thank you for contacting SecureLife. Your claim has been received under reference CLM-SL-220648. Your dedicated claims adjuster will be in contact within 3 business days to schedule an inspection."},
+          {"sp":"agent","nm":"SYSTEM","tx":"[SYSTEM] Claim created. Policy verified active. Adjuster assignment: FAILED SILENTLY — pool queue at capacity. SLA-CLM-001 clock starts April 1. Breach threshold: April 4. No alert triggered."}
         ],
-        "out": "Billing dispute logged as an informal note only. No ticket created. No follow-up scheduled. Verbal promise, no case number."
+        "out": "Claim CLM-SL-220648 filed and auto-acknowledged. No adjuster assigned. SLA-CLM-001 will breach April 4 with no action taken. Jennifer has no adjuster name or direct contact."
       },
       {
         "seq": 2,
-        "ch": "voice",
-        "icon": "📞",
-        "chNm": "Phone Call",
-        "ttl": "Phone Call — Ticket Opened, 48h Callback Promised",
-        "dt": "2026-05-07",
-        "ag": "Priya Okafor",
+        "ch": "chat",
+        "icon": "🤖",
+        "chNm": "Virtual Agent (Chatbot)",
+        "ttl": "Status Check — No Real Data, No Escalation Triggered",
+        "dt": "2026-04-07",
+        "ag": "Clara (SecureLife Virtual Assistant)",
         "sent": "neg",
-        "sEmoji": "😞",
-        "csat": 2,
+        "sEmoji": "😠",
+        "csat": 1,
         "esc": false,
-        "dur": "19 min",
+        "dur": "17 min",
+        "issues": ["SLA Breach"],
         "lines": [
-          {"sp":"cust","nm":"Rachel","tx":"Hi — I'm calling about a billing issue I reported six days ago. I still haven't heard back."},
-          {"sp":"agent","nm":"Priya","tx":"I can see an informal note from May 1st, but I don't see a ticket or case number raised."},
-          {"sp":"cust","nm":"Rachel","tx":"So nothing was actually done in six days?"},
-          {"sp":"agent","nm":"Priya","tx":"I'm raising a formal ticket right now. I'm promising you a callback within 48 hours. Your ticket number is TKT-MOB-330291."}
+          {"sp":"cust","nm":"Jennifer","tx":"Hi. I filed a home insurance claim six days ago — CLM-SL-220648. I was told an adjuster would be in touch within 3 business days. I haven't heard anything."},
+          {"sp":"agent","nm":"Clara","tx":"I can see your claim CLM-SL-220648 has been registered. Your claim is currently under review."},
+          {"sp":"cust","nm":"Jennifer","tx":"Has an adjuster been assigned? Why hasn't anyone contacted me in six days?"},
+          {"sp":"agent","nm":"Clara","tx":"I'm not able to display individual adjuster assignment details in this channel. I'd recommend calling our Claims team for specific case information."},
+          {"sp":"cust","nm":"Jennifer","tx":"So you can see the claim number but not any actual information about it? This wasn't helpful at all."}
         ],
-        "out": "Ticket TKT-MOB-330291 opened but misrouted to Network Faults queue instead of Billing Disputes. 48-hour callback SLA not met. Billing dispute still pending."
+        "out": "Virtual agent confirmed claim exists but provided no actionable status. SLA already breached by 3 days. No escalation triggered. No note created on CLM-SL-220648. Jennifer must call again and repeat full context."
       },
       {
         "seq": 3,
         "ch": "voice",
         "icon": "📞",
         "chNm": "Phone Call",
-        "ttl": "Phone Call — Hotspot Not Working (New Issue)",
-        "dt": "2026-05-10",
-        "ag": "Marcus Webb",
+        "ttl": "Callback Promised by April 8 — Never Delivered",
+        "dt": "2026-04-07",
+        "ag": "Marcus Delgado",
         "sent": "neg",
-        "sEmoji": "😞",
+        "sEmoji": "😠",
         "csat": 2,
-        "esc": false,
-        "dur": "15 min",
+        "esc": true,
+        "dur": "25 min",
+        "issues": ["Broken Promise", "Ownership Gap"],
         "lines": [
-          {"sp":"cust","nm":"Rachel","tx":"I have two things — a billing issue that's been open nearly two weeks with no update, and now my mobile hotspot has completely stopped working."},
-          {"sp":"agent","nm":"Marcus","tx":"Your hotspot service flag is showing inactive on our system even though your plan entitles you to it. This is a provisioning configuration issue."},
-          {"sp":"agent","nm":"Marcus","tx":"I need to escalate to our provisioning team — they'll call you within 24 hours."},
-          {"sp":"cust","nm":"Rachel","tx":"Can they also look at my billing ticket? TKT-MOB-330291. That's been waiting ten days."},
-          {"sp":"cust","nm":"Rachel","tx":"I'm a six-year Platinum customer. I really hope someone takes ownership of this."}
+          {"sp":"cust","nm":"Jennifer","tx":"I was just on your virtual assistant and it couldn't tell me anything useful. Six days and no adjuster has been in touch."},
+          {"sp":"agent","nm":"Marcus","tx":"I can see the claim was registered. I'm looking for the assigned adjuster — it appears it may still be in the assignment queue."},
+          {"sp":"cust","nm":"Jennifer","tx":"Six days later and no adjuster has been assigned?"},
+          {"sp":"agent","nm":"Marcus","tx":"I'm going to try to reach your adjuster team directly. [pause] They appear to be unavailable. I'm adding an urgent flag and escalating to my supervisor. I personally commit that someone will call you back within 24 hours."},
+          {"sp":"cust","nm":"Jennifer","tx":"That's what the email said 6 days ago. I need a real callback tomorrow — not another automated email."},
+          {"sp":"agent","nm":"Marcus","tx":"You have my word. A real person will call you by 3pm tomorrow."}
         ],
-        "out": "Hotspot escalated to provisioning team with 24h callback. Billing ticket cross-referenced but not actioned. Two open issues — no single owner."
+        "out": "Agent acknowledged SLA failure but could not reach adjuster team. Promised 24h callback by April 8 at 3pm. No automated callback task created — logged in agent notes only. Callback never delivered. SLA-CLM-002 created and breached."
       },
       {
         "seq": 4,
-        "ch": "callback",
-        "icon": "📲",
-        "chNm": "Callback",
-        "ttl": "Outbound Callback — Hotspot Restored (Temporary Fix)",
-        "dt": "2026-05-11",
-        "ag": "Simone Adeyemi",
-        "sent": "pos",
-        "sEmoji": "😊",
-        "csat": 4,
+        "ch": "email",
+        "icon": "📧",
+        "chNm": "Email (Inbound)",
+        "ttl": "Formal Written Complaint — Unanswered for 8 Days",
+        "dt": "2026-04-09",
+        "ag": "Unassigned — Email Queue",
+        "sent": "very-neg",
+        "sEmoji": "😡",
+        "csat": null,
         "esc": false,
-        "dur": "14 min",
+        "dur": "N/A",
+        "issues": ["SLA Breach", "Lack of Communication"],
         "lines": [
-          {"sp":"agent","nm":"Simone","tx":"Hi Rachel, this is Simone from NovaMobile Provisioning. Your hotspot feature had dropped out of active provisioning."},
-          {"sp":"agent","nm":"Simone","tx":"I've applied a profile reset. Can you restart your phone?"},
-          {"sp":"cust","nm":"Rachel","tx":"Sure... okay, it's back on. The hotspot is working!"},
-          {"sp":"cust","nm":"Rachel","tx":"Any update on my billing ticket — TKT-MOB-330291?"},
-          {"sp":"agent","nm":"Simone","tx":"I'm in Provisioning so I can't action billing directly, but I'll flag it again for the billing team."}
+          {"sp":"cust","nm":"Jennifer","tx":"URGENT: No Contact After 8 Days. I am writing to create a documented record. No adjuster has been assigned. Marcus Delgado promised a callback by April 8 at 3pm — it never came. My contractor cannot proceed without the adjuster assessment. Every day of delay causes further damage."},
+          {"sp":"cust","nm":"Jennifer","tx":"I am requesting: (1) Confirmation an adjuster has been assigned, (2) Adjuster name and direct contact, (3) Confirmed inspection date, (4) Explanation for the SLA breach. If I do not receive a response within 24 hours, I will escalate to the complaints department and the Department of Insurance."},
+          {"sp":"agent","nm":"SYSTEM","tx":"[SYSTEM] Email logged to Claims Email Queue. Queue volume: HIGH. Auto-acknowledgment sent. NOT linked to CLM-SL-220648. Email SLA (24h) breached. Unanswered 8 business days. Marcus Delgado's escalation note not visible to email queue."}
         ],
-        "out": "Hotspot restored via temporary profile reset. Root cause unresolved — expected to recur. Billing ticket still unactioned in wrong queue."
+        "out": "Jennifer's formal written complaint sits unread for 8 days. Not linked to original claim. Escalation note from Interaction 3 invisible to email team. DOI threat not flagged. Claim still unassigned."
       },
       {
         "seq": 5,
         "ch": "voice",
         "icon": "📞",
         "chNm": "Phone Call",
-        "ttl": "Phone Call — Hotspot Fails Again",
-        "dt": "2026-05-17",
-        "ag": "Marcus Webb",
+        "ttl": "Duplicate Escalation Ticket Created — Unlinked to Prior Record",
+        "dt": "2026-04-14",
+        "ag": "Priya Nambiar",
         "sent": "very-neg",
         "sEmoji": "😡",
         "csat": 1,
         "esc": true,
-        "dur": "19 min",
+        "dur": "26 min",
+        "issues": ["Ownership Gap", "Repeat Contact"],
         "lines": [
-          {"sp":"cust","nm":"Rachel","tx":"Marcus, the hotspot is down again. Someone reset the profile, it worked for six days, and now it's down again."},
-          {"sp":"cust","nm":"Rachel","tx":"And I still have no update on my billing ticket from sixteen days ago."},
-          {"sp":"cust","nm":"Rachel","tx":"At what point does someone actually own my account? I've called five times. I'm Platinum. I'm seriously thinking about switching providers."},
-          {"sp":"agent","nm":"Marcus","tx":"I'm flagging your account for a senior review right now. I've also re-routed the billing ticket directly to the Billing Disputes team."}
+          {"sp":"cust","nm":"Jennifer","tx":"I have been trying to get a status update for two weeks. I've spoken to your virtual agent, called twice, and sent a formal email. Nobody has helped me."},
+          {"sp":"agent","nm":"Priya","tx":"I can see there's an escalation flag on CLM-SL-220648. I don't have details on what action was taken after that escalation."},
+          {"sp":"cust","nm":"Jennifer","tx":"You're telling me you can see an escalation was flagged a week ago but don't know what happened?"},
+          {"sp":"agent","nm":"Priya","tx":"I'm going to raise a formal escalation ticket now — ESC-INS-44092."},
+          {"sp":"cust","nm":"Jennifer","tx":"There already IS one. From 7 days ago. So the first escalation just sat there for a week doing nothing?"},
+          {"sp":"agent","nm":"Priya","tx":"I'm marking ESC-INS-44092 as Critical and assigning to our Senior Claims team. They will contact you within 48 hours."},
+          {"sp":"cust","nm":"Jennifer","tx":"If I don't hear back in 48 hours I'm escalating to the insurance ombudsman. I want that noted."}
         ],
-        "out": "Hotspot escalated as repeat failure. Billing ticket re-routed. Senior advisor escalation raised. Rachel threatening churn explicitly."
+        "out": "Second escalation ticket ESC-INS-44092 created — NOT linked to original escalation. Two parallel records now exist. 48h callback committed for April 16. Not delivered. Ombudsman threat not flagged to management."
       },
       {
         "seq": 6,
-        "ch": "voice",
-        "icon": "📞",
-        "chNm": "Phone Call",
-        "ttl": "Phone Call — Billing Status Chase (Day 22)",
-        "dt": "2026-05-22",
-        "ag": "Priya Okafor",
+        "ch": "chat",
+        "icon": "💬",
+        "chNm": "Live Chat",
+        "ttl": "Conflicting SLA Information — Agent Sees Only New Ticket",
+        "dt": "2026-04-18",
+        "ag": "Tyler Osei",
         "sent": "very-neg",
         "sEmoji": "😡",
         "csat": 1,
         "esc": true,
-        "dur": "21 min",
+        "dur": "29 min",
+        "issues": ["SLA Breach"],
         "lines": [
-          {"sp":"cust","nm":"Rachel","tx":"Priya, you opened a billing ticket for me fifteen days ago — TKT-MOB-330291. I was promised a 48-hour callback. It never happened."},
-          {"sp":"agent","nm":"Priya","tx":"I can see it was routed to the Network Faults team instead of Billing Disputes. It's been sitting there for fifteen days without being actioned."},
-          {"sp":"cust","nm":"Rachel","tx":"Fifteen days. Nobody noticed."},
-          {"sp":"agent","nm":"Priya","tx":"I'm re-routing it to Billing Disputes right now, marking it urgent, and adding a priority flag given your tenure and Platinum status."},
-          {"sp":"cust","nm":"Rachel","tx":"At this point I just want the charge removed and my hotspot to work. That's all."}
+          {"sp":"cust","nm":"Jennifer","tx":"Claim CLM-SL-220648. I've been trying to get a status for 17 days. Escalation ticket ESC-INS-44092 is also 4 days old. I am escalating to the ombudsman if this is not resolved today."},
+          {"sp":"agent","nm":"Tyler","tx":"I can see ESC-INS-44092. It shows your claim is actively being reviewed by our claims team."},
+          {"sp":"cust","nm":"Jennifer","tx":"Has an adjuster visited my property? Has ANYONE contacted me proactively about this claim?"},
+          {"sp":"agent","nm":"Tyler","tx":"I don't have a record of those callbacks being completed. Our current SLA for escalated claims is 5 business days for a claims manager to respond."},
+          {"sp":"cust","nm":"Jennifer","tx":"A different agent told me on April 14 it would be 48 hours. Now you say 5 business days. Which is it? An escalation should mean FASTER, not slower."},
+          {"sp":"agent","nm":"Tyler","tx":"I'm adding an urgent note to ESC-INS-44092 now and flagging for immediate Senior Claims attention."},
+          {"sp":"cust","nm":"Jennifer","tx":"I have lost count of how many urgent flags have been added. Nothing has changed. I'm contacting the ombudsman tomorrow."}
         ],
-        "out": "Billing ticket re-routed after 15 days in wrong queue. Priority flag added. Senior escalation re-triggered. Customer trust severely eroded."
+        "out": "Chat agent only sees ESC-INS-44092 — not original claim history. Quoted wrong SLA (5 business days vs 48h). Day 17, no adjuster, no inspection. Ombudsman threat issued third time — not escalated to management."
       },
       {
         "seq": 7,
-        "ch": "callback",
-        "icon": "📲",
-        "chNm": "Callback",
-        "ttl": "Senior Advisor Callback — Both Issues Resolved",
-        "dt": "2026-05-25",
-        "ag": "Dominic Carr",
+        "ch": "voice",
+        "icon": "📞",
+        "chNm": "Phone Call (Husband)",
+        "ttl": "Adjuster Decision Found — Completed April 10, Never Communicated",
+        "dt": "2026-04-22",
+        "ag": "Sandra Whitfield",
+        "sent": "very-neg",
+        "sEmoji": "😡",
+        "csat": 1,
+        "esc": true,
+        "dur": "26 min",
+        "issues": ["Lack of Communication", "SLA Breach"],
+        "lines": [
+          {"sp":"cust","nm":"David (husband)","tx":"My name is David Torres. I'm calling on behalf of my wife Jennifer Torres, policy POL-SL-334821. She has been trying to get a status on CLM-SL-220648 for three weeks. She's become extremely stressed about this."},
+          {"sp":"agent","nm":"Sandra","tx":"David — I need to be honest with you. I've found something significant. Our adjuster Rachel Kim completed a desktop review of the claim on April 10. That's twelve days ago."},
+          {"sp":"cust","nm":"David (husband)","tx":"She reviewed it twelve days ago? Has Jennifer been contacted about the decision?"},
+          {"sp":"agent","nm":"Sandra","tx":"Looking at the outbound communication log — I'm not seeing any outbound contact to your wife following the review. I want to sincerely apologize. This should not have happened."},
+          {"sp":"cust","nm":"David (husband)","tx":"My wife has been calling for three weeks, told 'your claim is under review', while the review was already done and sitting there."},
+          {"sp":"agent","nm":"Sandra","tx":"My supervisor James Fry is now personally taking ownership. He will call Jennifer directly within 2 hours — not a queue callback, a direct call from him with authority to communicate the decision and discuss settlement."}
+        ],
+        "out": "Critical discovery: adjuster completed review April 10 — never communicated for 12 days. Automated outbound notification routed to dead email alias. Supervisor James Fry committed to 2-hour direct callback. Callback was never delivered."
+      },
+      {
+        "seq": 8,
+        "ch": "voice",
+        "icon": "📞",
+        "chNm": "Phone Call",
+        "ttl": "41 Days Open — Settlement Verbally Authorized, Not Yet Paid",
+        "dt": "2026-05-12",
+        "ag": "Natalie Cross / Patricia Voss (Manager)",
+        "sent": "very-neg",
+        "sEmoji": "😡",
+        "csat": 1,
+        "esc": true,
+        "dur": "36 min",
+        "issues": ["Broken Promise", "Ownership Gap", "SLA Breach", "Repeat Contact"],
+        "lines": [
+          {"sp":"cust","nm":"Jennifer","tx":"This is my eighth contact with SecureLife. I've spoken to four agents, used your chatbot, sent emails, filed escalation tickets. April 8 — Marcus Delgado promised a callback. April 16 — Priya Nambiar promised 48 hours. April 22 — Supervisor James Fry promised 2 hours. None of them called."},
+          {"sp":"agent","nm":"Natalie","tx":"I can confirm those commitments are in the notes and I see no record of those callbacks being completed. I am so sorry. I'm escalating to my manager Patricia Voss right now — not a callback, an actual supervisor on this call."},
+          {"sp":"cust","nm":"Jennifer","tx":"I have water damage sitting in my house. I've been paying for emergency moisture extraction out of my own pocket because I couldn't authorize permanent repairs without the settlement. Do you understand what 6 weeks of that costs?"},
+          {"sp":"agent","nm":"Patricia","tx":"Jennifer, this is Patricia Voss, Claims Manager. I've read the full record. I'm authorizing the $22,800 settlement today plus an additional goodwill payment for your out-of-pocket emergency costs. Payment within 48 hours. Written confirmation within the hour."},
+          {"sp":"cust","nm":"Jennifer","tx":"I've been a customer for twenty years. I've never missed a premium. And when I actually needed you, I had to fight for six weeks. I want the settlement paid and then I will decide whether I'm staying."}
+        ],
+        "out": "CLAIM UNRESOLVED AS OF INTERACTION 8. $22,800 settlement + goodwill verbally authorized by Claims Manager. Not yet paid. Jennifer's decision to remain a customer explicitly pending payment. Churn risk: CRITICAL."
+      },
+      {
+        "seq": 9,
+        "ch": "voice",
+        "icon": "📞",
+        "chNm": "Phone Call",
+        "ttl": "Jennifer Escalates to Director Level — Full Resolution",
+        "dt": "2026-05-13",
+        "ag": "David Okafor (Claims Director)",
         "sent": "pos",
         "sEmoji": "😊",
-        "csat": 4,
-        "esc": false,
-        "dur": "37 min",
+        "csat": 5,
+        "esc": true,
+        "dur": "43 min",
+        "issues": ["Repeat Contact", "Broken Promise", "SLA Breach", "Ownership Gap"],
         "lines": [
-          {"sp":"agent","nm":"Dominic","tx":"Rachel, this is Dominic Carr, Senior Customer Relations at NovaMobile. I've been assigned to your account personally."},
-          {"sp":"agent","nm":"Dominic","tx":"I've verified a $38.50 credit has been applied this morning. The charge was caused by a system miscategorisation affecting a small group of Unlimited Premium accounts."},
-          {"sp":"agent","nm":"Dominic","tx":"The hotspot root cause was a recurring provisioning flag triggered by periodic network refreshes. I've had that flag permanently resolved at the network level for your specific account."},
-          {"sp":"agent","nm":"Dominic","tx":"I'd also like to offer you a 15% discount on your plan for the next three billing cycles, as an acknowledgement of what you've been through."},
-          {"sp":"cust","nm":"Rachel","tx":"Yes, I'd accept that. Thank you Dominic."}
+          {"sp":"cust","nm":"Jennifer","tx":"I need to speak with a manager. Not a claims agent. Not a supervisor. A manager. I have been calling this company for six weeks and I am done being passed around."},
+          {"sp":"agent","nm":"David","tx":"My name is David Okafor. I am the Claims Director. I have taken this call personally. Who am I speaking with?"},
+          {"sp":"cust","nm":"Jennifer","tx":"Jennifer Torres. Policy POL-SL-334821. Claim CLM-SL-220648. This is the ninth time I have contacted SecureLife about this claim. I have never once been the one who dropped the ball."},
+          {"sp":"agent","nm":"David","tx":"Understood. Let me do the verification quickly and then I want to hear everything. Date of birth and postcode please."},
+          {"sp":"cust","nm":"Jennifer","tx":"[verification provided]"},
+          {"sp":"agent","nm":"David","tx":"Thank you Jennifer. I am pulling up your full account now. I am not going to ask you to summarize six weeks from scratch. I am reading it right now."},
+          {"sp":"cust","nm":"Jennifer","tx":"Good. Then you can see that I was promised a callback on April 8th. It never came. April 16th — never came. Supervisor James Fry personally committed to calling me within two hours on April 22nd. Three weeks ago. I have not heard from James Fry once."},
+          {"sp":"agent","nm":"David","tx":"I can see all three of those commitments in the notes. And I can see none of them were completed."},
+          {"sp":"cust","nm":"Jennifer","tx":"Three broken promises. Three different people. And my husband found out — completely by accident — that your adjuster had already reviewed my claim twelve days earlier and nobody had bothered to tell me."},
+          {"sp":"agent","nm":"David","tx":"Jennifer, what you just described is a failure at every level. The adjuster completing her review on April 10th and that decision never reaching you is not a small error. That is a fundamental breakdown in how we communicated with you."},
+          {"sp":"cust","nm":"Jennifer","tx":"I have water damage sitting in my home for six weeks. I have been paying for emergency moisture extraction out of my own pocket because I cannot authorize permanent repairs without a settlement figure."},
+          {"sp":"agent","nm":"David","tx":"I am not going to put you on hold. I am the right person to resolve this today. Your adjuster Rachel Kim assessed the claim at $22,800. I am authorizing the full settlement at $24,300 — your original contractor estimate — because the delays caused direct secondary moisture spread. That additional damage is our responsibility."},
+          {"sp":"cust","nm":"Jennifer","tx":"You are authorizing the full amount."},
+          {"sp":"agent","nm":"David","tx":"The full amount. Right now, on this call. Written payment confirmation within the hour. Funds in your account within 24 hours."},
+          {"sp":"cust","nm":"Jennifer","tx":"I have heard within 24 hours before and it has meant nothing."},
+          {"sp":"agent","nm":"David","tx":"I understand why you do not trust that. My direct email is david.okafor@securelife.com and my direct number is on the letter I am sending you today. If that confirmation does not arrive within the hour, you call me on that number. Not the claims line. Me."},
+          {"sp":"cust","nm":"Jennifer","tx":"That is the first time in nine contacts that anyone has offered me a direct line to a real person."},
+          {"sp":"agent","nm":"David","tx":"It should have been offered on day one. I am also authorizing a separate reimbursement of $1,800 for your out-of-pocket emergency costs. Send me the receipts directly to my email — I will process them the same day. No ticket. No queue."},
+          {"sp":"cust","nm":"Jennifer","tx":"I have every receipt. I kept everything because I stopped trusting that anyone here was keeping records."},
+          {"sp":"agent","nm":"David","tx":"You were right to do that. I want to acknowledge — you contacted us nine times. You used four channels. You sent a formal complaint. At every point the failure was on our side. You did everything right."},
+          {"sp":"cust","nm":"Jennifer","tx":"I am a twenty-year Platinum customer. I have never missed a premium payment. And the one time I needed SecureLife, I had to fight for six weeks just to get a phone call from someone who could actually help."},
+          {"sp":"agent","nm":"David","tx":"Twenty years. Your first claim. I am genuinely ashamed of how this was handled — not as a script, but as the person responsible for this department. I am opening an internal review of every failure point on your claim."},
+          {"sp":"cust","nm":"Jennifer","tx":"I came into this call prepared to cancel my policy. I want you to know that."},
+          {"sp":"agent","nm":"David","tx":"I know. I am not asking you to decide anything today. Let the payment land. Let the confirmation arrive. Then make your decision based on what we actually do, not what we say."},
+          {"sp":"cust","nm":"Jennifer","tx":"The way you have spoken to me on this call is the way every one of those eight agents should have spoken to me. Own it, name it, fix it. That is all I ever needed."},
+          {"sp":"agent","nm":"David","tx":"You deserved that from the very first call. I am sorry it took nine. The confirmation will be with you within the hour, Jennifer."},
+          {"sp":"cust","nm":"Jennifer","tx":"Thank you."}
         ],
-        "out": "Billing credit confirmed ($38.50). Hotspot permanently fixed at network level. 15% discount applied for 3 months. Retention offer accepted."
+        "out": "CLAIM RESOLVED. Settlement increased to $24,300 (full contractor estimate). Payment confirmed 10:47 AM, funds transferred May 14. Goodwill reimbursement $1,800 authorized. Formal apology letter dispatched. Internal post-incident review opened. Jennifer Torres retained. CLM-SL-220648 CLOSED."
       }
     ],
     "patterns": [
       {
         "sev": "🔴",
-        "lbl": "Broken Promise",
-        "desc": "Verbal promise at Interaction 1 with no ticket; 48-hour callback at Interaction 2 missed for 17 days"
+        "lbl": "Ownership Gap",
+        "desc": "8 contacts, 4+ agents, no single owner. Duplicate tickets never linked. Adjuster's decision routed to a dead email alias — never delivered.",
+        "ints": [1, 3, 5, 8, 9]
       },
       {
         "sev": "🔴",
-        "lbl": "Routing Failure",
-        "desc": "Ticket TKT-MOB-330291 misrouted to Network Faults queue instead of Billing Disputes for 15 days"
+        "lbl": "Broken Promise",
+        "desc": "3 callbacks committed, 0 delivered. April 8, April 16, April 22. All logged in agent notes only — no task, no follow-through.",
+        "ints": [3, 5, 7, 8, 9]
       },
       {
         "sev": "🔴",
         "lbl": "SLA Breach",
-        "desc": "Billing dispute open 22 days; 48-hour callback SLA missed by 15+ days"
-      },
-      {
-        "sev": "🔴",
-        "lbl": "Ownership Gap",
-        "desc": "Two simultaneous open issues with no single case owner across Billing, Technical, and Provisioning teams"
+        "desc": "4 SLAs breached: adjuster contact, callback, email response, post-decision communication. Decision missed by 11 days.",
+        "ints": [1, 2, 3, 4, 6, 7, 9]
       },
       {
         "sev": "🟠",
+        "lbl": "Lack of Communication",
+        "desc": "Adjuster reviewed on April 10. Decision sat 12 days undelivered. Zero proactive outreach in 41 days.",
+        "ints": [4, 7, 8]
+      },
+      {
+        "sev": "🟡",
         "lbl": "Repeat Contact",
-        "desc": "Rachel made 5 inbound calls for issues that should have been resolved proactively"
-      },
-      {
-        "sev": "🟠",
-        "lbl": "Inconsistent Information",
-        "desc": "Hotspot marked Resolved after temporary reset while underlying provisioning flag remained active"
+        "desc": "8 contacts across 4 channels in 41 days for a single unresolved claim. Every contact required Jennifer to re-explain context from scratch. Virtual agent (Interaction 2) left no trace on the claim record. Formal email (Interaction 4) not linked to original claim.",
+        "ints": [2, 3, 4, 5, 6, 7, 8, 9]
       }
     ],
     "actions": [
-      {
-        "pri": "Critical",
-        "txt": "Confirm the $38.50 billing credit is applied to Rachel's June statement — share the credit reference"
-      },
-      {
-        "pri": "Critical",
-        "txt": "Confirm the permanent hotspot provisioning fix at network level and share the service note reference"
-      },
-      {
-        "pri": "High",
-        "txt": "Activate the 15% retention discount on her plan for the next 3 billing cycles"
-      },
-      {
-        "pri": "High",
-        "txt": "Apologize personally for the 22-day billing dispute and the unkept 48-hour callback promise"
-      },
-      {
-        "pri": "Medium",
-        "txt": "Send a written email summary with TKT-MOB-330291 closure, hotspot fix reference, and the retention discount details"
-      },
-      {
-        "pri": "Medium",
-        "txt": "Schedule a 14-day check-in call to verify hotspot stability and the credit appearance on her June statement"
-      },
-      {
-        "pri": "Medium",
-        "txt": "Note Rachel's account: any future fault on this line auto-escalates to Senior Customer Relations (Platinum tier)"
-      }
+      {"pri": "Critical", "txt": "Confirm $22,800 settlement payment initiated within 48 hours and provide written confirmation with goodwill amount"},
+      {"pri": "Critical", "txt": "Communicate adjuster Rachel Kim's April 10 decision in full — explain outcome, next steps, and repair authorization"},
+      {"pri": "High", "txt": "Assign single named case owner for CLM-SL-220648 and link all records (ESC-INS-44092 + original escalation) into one unified view"},
+      {"pri": "High", "txt": "Initiate formal complaint response acknowledging all 4 SLA breaches and 3 broken callback promises with written apology"},
+      {"pri": "High", "txt": "Escalate dead email alias (claims-outbound@securelife-old.com) routing failure to IT — implement SMS/phone fallback for post-decision notification"},
+      {"pri": "Medium", "txt": "Offer dedicated claims liaison for remainder of settlement and repair authorization process to rebuild trust"}
     ],
-    "rootCause": "Two independent failures compounded each other. The billing dispute was caused by a known system miscategorisation affecting Unlimited Premium accounts — a known defect not communicated proactively to affected customers. The first agent failed to open a ticket; when the second agent did, it was misrouted to the wrong team for 15 days. The hotspot failure was caused by a recurring provisioning flag triggered by periodic network refreshes — a known infrastructure issue not documented in agent tooling, leading to repeated temporary fixes. No system detected that a single customer had two simultaneous open issues, and no single owner was assigned."
+    "rootCause": "Adjuster Rachel Kim completed a desktop review on April 10, 2026 — 9 days after filing, within reasonable limits. The failure was entirely communicative. The automated outbound notification was routed to a decommissioned email alias (claims-outbound@securelife-old.com). No fallback SMS or phone notification existed. No supervisor alert fired when the 24h post-decision SLA was missed. Three callback commitments were recorded in agent notes only — no automated task, no supervisor assignment. Duplicate escalation tickets were never linked in CRM, leaving every subsequent agent partially blind."
   },
   {
     "key": "MC-AUTH-HC-220891",
-    "name": "Jennifer Martinez",
+    "name": "Jennifer Torres",
     "init": "JM",
     "id": "CUST-HC-10021",
     "ref": "AUTH-HC-220891",
@@ -755,7 +912,7 @@ const CASES=[
     "status": "Resolved",
     "totalInts": 7,
     "lastCh": "Callback",
-    "internalNote": "Jennifer Martinez has contacted Healthcare support <strong>7 times</strong> regarding: <strong>The Prior Authorization That Blocked Treatment</strong>. Risk score: <strong>9.5 / 10 — CRITICAL RISK</strong>. Most recent contact via <strong>Callback</strong>. Prior authorization request was received but never assigned to a clinical reviewer. The system lacked automatic escalation triggers for time-sensitive medical cases. An agent promise of expedited revi.",
+    "internalNote": "Jennifer Torres has contacted Healthcare support <strong>7 times</strong> regarding: <strong>The Prior Authorization That Blocked Treatment</strong>. Risk score: <strong>9.5 / 10 — CRITICAL RISK</strong>. Most recent contact via <strong>Callback</strong>. Prior authorization request was received but never assigned to a clinical reviewer. The system lacked automatic escalation triggers for time-sensitive medical cases. An agent promise of expedited revi.",
     "snapshotBullets": [
       "Healthcare customer · PPO — Premium Family Plan · CUST-HC-10021",
       "7 prior contacts since 2026-06-02 — case unresolved",
@@ -810,7 +967,7 @@ const CASES=[
         "chNm": "Phone Call",
         "ttl": "Phone Call — Contact 1",
         "dt": "2026-06-02",
-        "ag": "Rachel Kim",
+        "ag": "Jennifer Kim",
         "sent": "neutral",
         "sEmoji": "😐",
         "csat": 3,
@@ -819,7 +976,7 @@ const CASES=[
         "lines": [
           {
             "sp": "agent",
-            "nm": "Rachel",
+            "nm": "Jennifer",
             "tx": "Thank you for calling CareFirst Member Services. How can I help you today?"
           },
           {
@@ -829,7 +986,7 @@ const CASES=[
           },
           {
             "sp": "agent",
-            "nm": "Rachel",
+            "nm": "Jennifer",
             "tx": "I can see an authorization request on file. Reference number AUTH-HC-220891."
           },
           {
@@ -839,7 +996,7 @@ const CASES=[
           },
           {
             "sp": "agent",
-            "nm": "Rachel",
+            "nm": "Jennifer",
             "tx": "Authorizations are typically reviewed within 5 to 7 business days."
           }
         ],
@@ -2941,7 +3098,7 @@ const CASES=[
         "chNm": "Phone Call",
         "ttl": "Phone Call — Contact 6",
         "dt": "2026-05-14",
-        "ag": "Rachel Foster",
+        "ag": "Jennifer Foster",
         "sent": "very-neg",
         "sEmoji": "😡",
         "csat": 1,
@@ -2950,7 +3107,7 @@ const CASES=[
         "lines": [
           {
             "sp": "agent",
-            "nm": "Rachel",
+            "nm": "Jennifer",
             "tx": "I understand your claim has been through several departments without resolution."
           },
           {
@@ -2960,7 +3117,7 @@ const CASES=[
           },
           {
             "sp": "agent",
-            "nm": "Rachel",
+            "nm": "Jennifer",
             "tx": "I am assigning a dedicated claim handler to your case right now."
           }
         ],
@@ -3417,15 +3574,26 @@ const ISSUE_RULES=[
   {tag:'Broken Promise',         re:/\b(promise|promised|promising|commitment|get back to you|look into (this|it)( further)?|let me look into|i'?ll (make a note|flag|investigate|review|raise|call you back|get back|look)|callback within|within (24|48|72) ?hours?|i'?m raising|raising a formal ticket)\b/i},
   {tag:'SLA Breach',             re:/\b(sla|exceeded|been waiting|haven'?t heard|open for|\d+ days (ago|open|without)|fifteen days|sixteen days|seventeen days|nineteen days|twenty days|22 days|14\+ days|sla not met|callback sla|sitting (there|in)|days without|nineteen)\b/i},
   {tag:'Routing Failure',        re:/\b(routing|routed|wrong (team|queue|department)|misrouted|re-?routed|network faults queue|wrong queue|routed to .{1,40}? instead)\b/i},
-  {tag:'Ownership Gap',          re:/\b(no response|unassigned|nobody|no (single )?owner|takes ownership|two (open )?issues|no one (owns|has|takes)|i'?m in .{1,30}? so i can'?t|own my account|owns this|i can'?t update|i can'?t action)\b/i},
+  {tag:'Ownership Gap',          re:/\b(no response|unassigned|nobody|no (single )?owner|takes ownership|two (open )?issues|no one (owns|has|takes)|i'?m in .{1,30}? so i can'?t|own my account|owns this|i can'?t update|i can'?t action|no adjuster|assignment queue|failed silently|passed around|don'?t have details|no record of|none of them (called|followed|came)|I don'?t have detail)\b/i},
   {tag:'Repeat Contact',         re:/\b(repeat|second time|third time|fourth time|five times|four times|i'?ve called|been calling|recur(red|rence)?|same issue|again|called .{1,20}? (times|today)|last week|down again)\b/i},
   {tag:'Inconsistent Information',re:/\b(conflict|conflicting|inconsistent|contradicting|incorrect|wrong (diagnosis|info|information)|different (agents|answers|teams)|isolation|visibility|no visibility|in isolation|marked .{1,20}? resolved|each (contact|agent)|nobody noticed|i don'?t see (a|any)|cannot locate)\b/i}
 ];
 function detectIssues(n){
+  if(Array.isArray(n.issues)&&n.issues.length>0) return n.issues;
+  const c=CASES.find(x=>x.key===curKey);
+  if(c&&c.patterns&&c.patterns.some(p=>Array.isArray(p.ints)&&p.ints.length>0)){
+    return c.patterns.filter(p=>Array.isArray(p.ints)&&p.ints.includes(n.seq)).map(p=>p.lbl);
+  }
   const text=(n.out||'')+' '+(n.lines||[]).map(l=>l.tx).join(' ');
   return ISSUE_RULES.filter(r=>r.re.test(text)).map(r=>r.tag);
 }
 function countPatternInJourney(c,pat){
+  /* Exclude last node (live call) until transcript is done */
+  const nodes=window._transcriptDone ? c.nodes : c.nodes.slice(0, c.nodes.length-1);
+  /* Count interactions where this pattern appears in n.issues[] */
+  const fromIssues=nodes.filter(n=>Array.isArray(n.issues)&&n.issues.includes(pat.lbl)).length;
+  if(fromIssues>0) return fromIssues;
+  if(Array.isArray(pat.ints)&&pat.ints.length>0) return pat.ints.length;
   const descNum=(pat.desc||'').match(/(\d+)\+?\s+(times?|contacts?|calls?|agents?|interactions?|escalations?)/i);
   if(descNum) return parseInt(descNum[1],10);
   const rule=ISSUE_RULES.find(r=>r.tag===pat.lbl);
@@ -3442,7 +3610,7 @@ function countPatternInJourney(c,pat){
 function issueClass(tag){return 'ic-'+tag.toLowerCase().replace(/\s+/g,'-');}
 
 /* ── sentence-level pattern highlighter ── */
-function highlightPatterns(text){
+function highlightPatterns(text,allowedTags){
   if(!text) return '';
   const escaped=String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const re=/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g;
@@ -3450,7 +3618,8 @@ function highlightPatterns(text){
   while((m=re.exec(escaped))!==null){
     const sent=m[0];
     if(!sent.trim()){out+=sent;continue;}
-    const hits=ISSUE_RULES.filter(r=>r.re.test(sent));
+    let hits=ISSUE_RULES.filter(r=>r.re.test(sent));
+    if(allowedTags&&allowedTags.length) hits=hits.filter(r=>allowedTags.includes(r.tag));
     if(hits.length===0){out+=sent;continue;}
     const tag=hits[0].tag;
     const cls='hl-'+tag.toLowerCase().replace(/\s+/g,'-');
@@ -3489,13 +3658,15 @@ let curKey=CASES[0]?.key, curTab='voice', callSec=0, activeIssueFilter=null;
 (function init(){
   selectCase(curKey);
   document.getElementById('queue-badge').textContent=CASES.length;
-  setInterval(()=>{
+  setInterval(function(){
     callSec++;
-    const h=Math.floor(callSec/3600),m=Math.floor((callSec%3600)/60),s=callSec%60;
-    const el=document.getElementById('call-timer');
-    if(el) el.textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':');
+    var h=Math.floor(callSec/3600),m=Math.floor((callSec%3600)/60),s=callSec%60;
+    var el=document.getElementById('call-timer');
+    if(el) el.textContent=[h,m,s].map(function(x){return String(x).padStart(2,'0');}).join(':');
   },1000);
 })();
+
+
 
 function selectCase(key){
   curKey=key; curTab='voice'; activeIssueFilter=null; closeDrawer();
@@ -3503,6 +3674,9 @@ function selectCase(key){
   document.getElementById('hdr-av').textContent=c.init;
   renderCallCard(c);
   renderVoiceTab(c);
+  const chatBar=document.getElementById('chat-bar');
+  if(chatBar) chatBar.style.display='block';
+  startTranscript(c);
 }
 
 /* ── compact call card ── */
@@ -3532,7 +3706,7 @@ function renderCallCard(c){
 function renderTabBar(activeTab){
   document.getElementById('tab-bar').innerHTML=`
     <div class="m-tab${activeTab==='voice'?' active':''}" onclick="switchTab('voice')">
-      <i class="fas fa-phone"></i>Voice
+      <i class="fas fa-comment-dots"></i>Chat
     </div>
     <div class="m-tab${activeTab==='history'?' active':''}" onclick="switchTab('history')">
       <i class="fas fa-route"></i>Customer Journey
@@ -3544,6 +3718,10 @@ function switchTab(tab){
   activeIssueFilter=null;
   const c=CASES.find(x=>x.key===curKey); if(!c) return;
   renderTabBar(tab);
+  const chatBar=document.getElementById('chat-bar');
+  if(chatBar) chatBar.style.display=tab==='voice'?'block':'none';
+  const trPanel=document.getElementById('transcript-panel');
+  if(trPanel) trPanel.classList.toggle('hidden',tab!=='voice');
   if(tab==='voice')   renderVoiceTab(c);
   if(tab==='history') renderHistoryTab(c);
 }
@@ -3595,6 +3773,26 @@ function renderVoiceTab(c){
       <div class="ai-lines-hdr"><i class="fas fa-robot"></i>⚡ AI Suggested Opening Lines</div>
       ${lines}
     </div>`;
+  /* Re-append any pattern alerts that fired during the live demo */
+  if(window._demoAlerts&&window._demoAlerts.length){
+    const tc=document.getElementById('tab-content');
+    window._demoAlerts.forEach(function(trig){
+      const alrt=document.createElement('div');
+      alrt.className='pat-alert sev-'+trig.sev;
+      alrt.setAttribute('data-lbl',trig.lbl);
+      alrt.innerHTML='<div class="pat-alert-icon">'+(trig.sev==='red'?'&#128308;':'&#128993;')+'</div>'
+        +'<div class="pat-alert-body">'
+          +'<div class="pat-alert-lbl">Pattern Detected &middot; '+trig.lbl+'</div>'
+          +'<div class="pat-alert-msg">'+trig.msg+'</div>'
+        +'</div>'
+        +'<div class="pat-alert-cta">View in Journey &#8594;</div>';
+      alrt.onclick=function(){
+        const l=this.getAttribute('data-lbl');
+        if(typeof onPatternClick==='function') onPatternClick(l);
+      };
+      tc.appendChild(alrt);
+    });
+  }
 }
 
 /* ── history tab ── */
@@ -3602,7 +3800,8 @@ function renderHistoryTab(c){
   renderTabBar('history');
   const chCol={voice:'#126bce',email:'#6b7280',chat:'#00bfa6',livechat:'#00bfa6',
     whatsapp:'#25d366',portal:'#556cd6',callback:'#126bce',social:'#e754a8',mobile:'#ffb800',auto:'#9ca3af'};
-  const nodes=c.nodes.map((n,i)=>{
+  const visibleNodes = window._transcriptDone ? c.nodes : c.nodes.slice(0, c.nodes.length - 1);
+  const nodes=visibleNodes.map((n,i)=>{
     const col=chCol[n.ch]||'#126bce';
     const csat=n.csat?`<span class="tl-csat c${n.csat}">CSAT ${n.csat}/5</span>`:'';
     const esc=n.esc?'<span class="esc-tag">↑ ESC</span>':'';
@@ -3621,6 +3820,8 @@ function renderHistoryTab(c){
       </div>
     </div>`;
   }).join('');
+  const liveIndicator = window._transcriptDone ? '' :
+    `<div class="tl-pending"><span class="tl-pending-dot"></span>Live call in progress — Interaction ${c.nodes.length} will appear once the call ends.</div>`;
   const pats=c.patterns.map(p=>{
     const lbl=String(p.lbl).replace(/'/g,"\\'");
     const sev=p.sev==='🔴'?'sev-r':'sev-o';
@@ -3653,6 +3854,7 @@ function renderHistoryTab(c){
         </div>
         <div class="flt-bar" id="flt-bar"></div>
         ${nodes}
+        ${liveIndicator}
       </div>
       <div class="hist-brief">
         <div class="brief-card">
@@ -3782,8 +3984,9 @@ function openDrawer(idx){
   document.getElementById('dr-dur').textContent=n.dur||'—';
   const ee=document.getElementById('dr-esc');
   ee.textContent=n.esc?'⚠️ Yes':'No'; ee.style.color=n.esc?'var(--err)':'inherit';
-  document.getElementById('dr-out').innerHTML=highlightPatterns(n.out);
-  const detected=detectIssues(n);
+  const isLiveLastNode = !window._transcriptDone && idx === c.nodes.length - 1;
+  const detected = isLiveLastNode ? [] : detectIssues(n);
+  document.getElementById('dr-out').innerHTML=highlightPatterns(n.out,detected);
   const patsHdr=detected.length
     ? `<div class="dr-pats"><div class="dr-pats-lbl">Patterns detected in this contact</div>
         <div class="dr-pats-row">${detected.map(t=>`<span class="issue-chip ${issueClass(t)}">${t}</span>`).join('')}</div></div>`
@@ -3791,17 +3994,271 @@ function openDrawer(idx){
         <div class="dr-pats-empty">No failure patterns detected in this interaction.</div></div>`;
   const bubbles=n.lines.map(l=>{
     const cls=l.sp==='cust'?'b-cust':l.sp==='sys'?'b-sys':'b-agent';
-    return `<div class="bubble ${cls}"><div class="bubble-sp">${l.nm}</div><div class="bubble-txt">${highlightPatterns(l.tx)}</div></div>`;
+    return `<div class="bubble ${cls}"><div class="bubble-sp">${l.nm}</div><div class="bubble-txt">${highlightPatterns(l.tx,detected)}</div></div>`;
   }).join('');
   document.getElementById('dr-body').innerHTML=patsHdr+bubbles;
   document.getElementById('overlay').classList.add('on');
   document.getElementById('drawer').classList.add('on');
+}
+function autoResizeChatInput(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,80)+'px';
+}
+function chatSendOnEnter(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMessage();}
+}
+function sendChatMessage(){
+  const inp=document.getElementById('chat-input');
+  const msg=inp.value.trim(); if(!msg) return;
+  inp.value=''; inp.style.height='auto';
+}
+let trTimer=null,trIndex=0,trLines=[],trSeconds=0;
+function startTranscript(c){
+  const panel=document.getElementById('transcript-panel');
+  const scroll=document.getElementById('tr-scroll');
+  const nameEl=document.getElementById('tr-hdr-name');
+  if(!panel||!scroll) return;
+  // Build a flat sequence: for each node, prepend a divider item then its lines
+  trLines=[];
+  c.nodes.forEach(function(n){
+    const patMap={'🔴':'sev-red','🟠':'sev-orange','🟡':'sev-yellow'};
+    const issueLabels=Array.isArray(n.issues)&&n.issues.length>0 ? n.issues : (c.patterns||[]).filter(function(p){return Array.isArray(p.ints)&&p.ints.includes(n.seq);}).map(function(p){return p.lbl;});
+    const pats=issueLabels.map(function(lbl){return (c.patterns||[]).find(function(p){return p.lbl===lbl;})||{sev:'🟡',lbl:lbl};});
+    trLines.push({_divider:true,seq:n.seq,ttl:n.ttl||n.chNm,ch:n.chNm,icon:n.icon||'',pats:pats,patMap:patMap});
+    n.lines.forEach(function(l){trLines.push({...l,isCust:l.sp==='cust'});});
+  });
+  trIndex=0; trSeconds=0;
+  scroll.innerHTML='';
+  nameEl.textContent=c.name;
+  panel.classList.remove('hidden');
+  clearInterval(trTimer);
+  trTimer=setInterval(tickTranscript,2800);
+  tickTranscript();
+}
+function tickTranscript(){
+  const scroll=document.getElementById('tr-scroll');
+  if(!scroll) return;
+  const existing=scroll.querySelector('.tr-typing');
+  if(existing) existing.remove();
+  if(trIndex>=trLines.length){clearInterval(trTimer);return;}
+  const item=trLines[trIndex]; trIndex++;
+  if(item._divider){
+    const div=document.createElement('div');
+    div.className='tr-node-divider';
+    let patsHtml='';
+    if(item.pats&&item.pats.length){
+      patsHtml='<div class="tr-patterns">'+item.pats.map(function(p){
+        const cls=item.patMap[p.sev]||'sev-yellow';
+        return '<span class="tr-pat '+cls+'">'+p.sev+' '+p.lbl+'</span>';
+      }).join('')+'</div>';
+    }
+    div.innerHTML='<div class="tr-node-seq">'+item.icon+' Interaction '+item.seq+' &mdash; '+item.ch+'</div>'
+      +'<div class="tr-node-ttl">'+item.ttl+'</div>'
+      +patsHtml;
+    scroll.appendChild(div);
+    // immediately tick next (the first line of this node)
+    if(trIndex<trLines.length){
+      scroll.scrollTop=scroll.scrollHeight;
+      return tickTranscript();
+    }
+    return;
+  }
+  trSeconds+=Math.floor(Math.random()*12+4);
+  const mins=Math.floor(trSeconds/60),secs=trSeconds%60;
+  const ts=String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');
+  const isCust=item.sp==='cust';
+  const entry=document.createElement('div');
+  entry.className='tr-entry';
+  entry.innerHTML='<div class="tr-speaker'+(isCust?' cust-sp':'')+'">'+( item.nm||'System')+' <span class="tr-ts">'+ts+'</span></div><div class="tr-bubble'+(isCust?' cust':'')+'">'+item.tx+'</div>';
+  scroll.appendChild(entry);
+  if(trIndex<trLines.length){
+    const typing=document.createElement('div');
+    typing.className='tr-entry tr-typing';
+    typing.innerHTML='<div class="tr-bubble typing"><div class="tr-dot"></div><div class="tr-dot"></div><div class="tr-dot"></div></div>';
+    scroll.appendChild(typing);
+  }
+  scroll.scrollTop=scroll.scrollHeight;
+}
+function closeTranscript(){
+  clearInterval(trTimer);
+  const panel=document.getElementById('transcript-panel');
+  if(panel) panel.classList.add('hidden');
 }
 function closeDrawer(){
   document.getElementById('overlay').classList.remove('on');
   document.getElementById('drawer').classList.remove('on');
   document.querySelectorAll('.tl-node').forEach(el=>el.classList.remove('sel'));
 }
+
 </script>
+
+<script>
+(function(){
+  var callTimer=null, msgTimer=null;
+
+  var MSGS=[
+    {c:1,n:"Jennifer",t:"I need to speak with a manager. Not a claims agent. Not a supervisor. A manager. I have been calling this company for six weeks and I am done being passed around."},
+    {c:0,n:"David",t:"My name is David Okafor. I am the Claims Director. I have taken this call personally. Who am I speaking with?"},
+    {c:1,n:"Jennifer",t:"Jennifer Torres. Policy POL-SL-334821. Claim CLM-SL-220648. This is the ninth time I have contacted SecureLife. I have never once been the one who dropped the ball."},
+    {c:0,n:"David",t:"Understood. Let us do the verification quickly and then I want to hear everything. Date of birth and postcode please."},
+    {c:1,n:"Jennifer",t:"[verification provided]"},
+    {c:0,n:"David",t:"Thank you Jennifer. I am pulling up your full account now. I am not going to ask you to summarize six weeks from scratch. I am reading it right now."},
+    {c:1,n:"Jennifer",t:"Good. Then you can see that I was promised a callback on April 8th. It never came. April 16th never came. Supervisor James Fry personally committed to calling me within two hours on April 22nd. Three weeks ago. I have not heard from James Fry once."},
+    {c:0,n:"David",t:"I can see all three of those commitments in the notes. And I can see none of them were completed."},
+    {c:1,n:"Jennifer",t:"Three broken promises. Three different people. My husband called and found out that your adjuster had already reviewed my claim twelve days earlier and nobody had bothered to tell me."},
+    {c:0,n:"David",t:"Jennifer, what you just described is a failure at every level. The adjuster completing her review on April 10th and that decision never reaching you is not a small error. That is a fundamental breakdown."},
+    {c:1,n:"Jennifer",t:"I have water damage sitting in my home for six weeks. I have been paying for emergency moisture extraction out of my own pocket because I cannot authorize permanent repairs without a settlement figure."},
+    {c:0,n:"David",t:"I am authorizing the full settlement at $24,300 your original contractor estimate because the delays caused secondary moisture spread. That additional damage is our responsibility."},
+    {c:1,n:"Jennifer",t:"You are authorizing the full amount."},
+    {c:0,n:"David",t:"The full amount. Right now, on this call. Written payment confirmation within the hour. Funds in your account within 24 hours."},
+    {c:1,n:"Jennifer",t:"I have heard within 24 hours before and it has meant nothing."},
+    {c:0,n:"David",t:"My direct email is david.okafor@securelife.com. If that confirmation does not arrive within the hour, you call me directly. Not the claims line. Me."},
+    {c:1,n:"Jennifer",t:"That is the first time in nine contacts that anyone has offered me a direct line to a real person."},
+    {c:0,n:"David",t:"It should have been offered on day one. I am also authorizing a reimbursement of $1,800 for your out-of-pocket emergency costs. Send me the receipts directly. No ticket. No queue."},
+    {c:1,n:"Jennifer",t:"I have every receipt. I kept everything because I stopped trusting that anyone here was keeping records."},
+    {c:0,n:"David",t:"You were right to do that. You contacted us nine times, used four channels, sent a formal complaint. At every point the failure was on our side. You did everything right."},
+    {c:1,n:"Jennifer",t:"I am a twenty-year Platinum customer. I have never missed a premium payment. And the one time I needed SecureLife I had to fight for six weeks just to reach someone who could actually help."},
+    {c:0,n:"David",t:"Twenty years. Your first claim. I am genuinely ashamed of how this was handled. I am opening an internal review of every single failure point on your claim."},
+    {c:1,n:"Jennifer",t:"I came into this call prepared to cancel my policy. I want you to know that."},
+    {c:0,n:"David",t:"I know. I am not asking you to decide anything today. Let the payment land, let the confirmation arrive, then decide based on what we actually do not what we say."},
+    {c:1,n:"Jennifer",t:"The way you have spoken to me on this call is the way every one of those eight agents should have spoken to me. Own it, name it, fix it. That is all I ever needed."},
+    {c:0,n:"David",t:"You deserved that from the very first call. I am sorry it took nine. The confirmation will be with you within the hour, Jennifer."},
+    {c:1,n:"Jennifer",t:"Thank you."}
+  ];
+
+  function pad(n){return n<10?'0'+n:''+n;}
+
+  function startDemo(){
+    var panel  = document.getElementById('transcript-panel');
+    var scroll = document.getElementById('tr-scroll');
+    var nameEl = document.getElementById('tr-hdr-name');
+    var timerEl= document.getElementById('call-timer');
+    if(!panel||!scroll) return;
+
+    /* Init global alert store */
+    window._demoAlerts=[];
+    window._transcriptDone=false;
+    /* Show panel and clear it */
+    panel.classList.remove('hidden');
+    if(nameEl) nameEl.textContent='Jennifer Torres';
+    scroll.innerHTML='';
+
+    /* Interaction header */
+    var hdr=document.createElement('div');
+    hdr.className='tr-node-divider';
+    hdr.innerHTML=
+      '<div class="tr-node-seq">&#128222; Interaction 9 &mdash; Phone Call (Inbound)</div>'+
+      '<div class="tr-node-ttl">Jennifer Escalates to Director Level &mdash; Full Resolution</div>'+
+      '<div class="tr-patterns" id="int9-patterns" style="display:none">'+
+        '<span class="tr-pat sev-red">&#128308; Repeat Contact</span>'+
+        '<span class="tr-pat sev-red">&#128308; Broken Promise</span>'+
+        '<span class="tr-pat sev-red">&#128308; SLA Breach</span>'+
+        '<span class="tr-pat sev-red">&#128308; Ownership Gap</span>'+
+      '</div>';
+    scroll.appendChild(hdr);
+
+    /* Start In-Call timer */
+    var sec=0;
+    if(timerEl) timerEl.textContent='00:00:00';
+    callTimer=setInterval(function(){
+      sec++;
+      var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+      if(timerEl) timerEl.textContent=pad(h)+':'+pad(m)+':'+pad(s);
+    },1000);
+
+    /* Message playback */
+    var msgIdx=0, msgSec=0;
+    function nextMsg(){
+      var dot=scroll.querySelector('.lc-dot');
+      if(dot) dot.parentNode.removeChild(dot);
+      if(msgIdx>=MSGS.length){
+        /* done — stop call timer, update status, unlock journey */
+        clearInterval(callTimer);
+        window._transcriptDone=true;
+        /* Reveal Int 9 pattern badges now that call is done */
+        var p9=document.getElementById('int9-patterns');
+        if(p9) p9.style.display='';
+        /* Drop risk score to 1 after call resolved */
+        (function(){
+          var cc=CASES.find(function(x){return x.key==='MC-CLM-SL-220648';});
+          if(cc){ cc.score=1; cc.label='Low Risk'; cc.col='#16a34a'; }
+        })();
+        var inCallEl=document.querySelector('.in-call');
+        if(inCallEl){
+          inCallEl.classList.add('ended');
+          var lbl=inCallEl.querySelector('span');
+          if(lbl) lbl.textContent='Call Ended';
+        }
+        var liveEl=document.querySelector('.tr-live');
+        if(liveEl){
+          liveEl.style.animation='none';
+          liveEl.innerHTML='<div style="width:6px;height:6px;border-radius:50%;background:var(--n300);flex-shrink:0"></div>'
+            +'<span style="color:var(--n400);font-weight:600">Ended</span>';
+        }
+        /* If user is already on the Journey tab, refresh it to reveal the timeline */
+        if(typeof curTab!=='undefined'&&curTab==='history'){
+          var cc=CASES.find(function(x){return x.key===curKey;});
+          if(cc) renderHistoryTab(cc);
+        }
+        return;
+      }
+      var m=MSGS[msgIdx++];
+      msgSec+=Math.floor(Math.random()*8+4);
+      var ts=pad(Math.floor(msgSec/60))+':'+pad(msgSec%60);
+      var e=document.createElement('div');
+      e.className='tr-entry';
+      e.innerHTML=
+        '<div class="tr-speaker'+(m.c?' cust-sp':'')+'">'+m.n+
+        ' <span class="tr-ts">'+ts+'</span></div>'+
+        '<div class="tr-bubble'+(m.c?' cust':'')+'">'+m.t+'</div>';
+      scroll.appendChild(e);
+      /* ── Pattern alert injection ── */
+      var TRIGGERS={
+        1:{lbl:'Repeat Contact',  sev:'yellow',msg:'Customer has contacted 9 times across 4 channels. No single owner identified.'},
+        7:{lbl:'Broken Promise',  sev:'red',  msg:'3 callback commitments logged in agent notes. Zero follow-through on any of them.'},
+        9:{lbl:'SLA Breach',      sev:'red',  msg:'Adjuster decision sat 12 days undelivered. Post-decision SLA breached by 11 days.'},
+        11:{lbl:'Ownership Gap',  sev:'red',  msg:"Decision routed to dead email alias. Customer paying out-of-pocket due to unresolved claim."}
+      };
+      if(TRIGGERS[msgIdx]){
+        var trig=TRIGGERS[msgIdx];
+        var tc=document.getElementById('tab-content');
+        if(tc){
+          var alrt=document.createElement('div');
+          alrt.className='pat-alert sev-'+trig.sev;
+          alrt.setAttribute('data-lbl',trig.lbl);
+          alrt.innerHTML=
+            '<div class="pat-alert-icon">'+(trig.sev==='red'?'&#128308;':'&#128993;')+'</div>'+
+            '<div class="pat-alert-body">'+
+              '<div class="pat-alert-lbl">Pattern Detected &middot; '+trig.lbl+'</div>'+
+              '<div class="pat-alert-msg">'+trig.msg+'</div>'+
+            '</div>'+
+            '<div class="pat-alert-cta">View in Journey &#8594;</div>';
+          alrt.onclick=function(){
+            var l=this.getAttribute('data-lbl');
+            if(typeof onPatternClick==='function') onPatternClick(l);
+          };
+          window._demoAlerts.push(trig);
+          tc.appendChild(alrt);
+          tc.scrollTop=tc.scrollHeight;
+        }
+      }
+      if(msgIdx<MSGS.length){
+        var d=document.createElement('div');
+        d.className='tr-entry lc-dot';
+        d.innerHTML='<div class="tr-bubble typing">'+
+          '<div class="tr-dot"></div><div class="tr-dot"></div><div class="tr-dot"></div></div>';
+        scroll.appendChild(d);
+      }
+      scroll.scrollTop=scroll.scrollHeight;
+      msgTimer=setTimeout(nextMsg,3000);
+    }
+    nextMsg();
+  }
+
+  /* Run after a short delay so init() finishes first */
+  setTimeout(startDemo, 300);
+})();
+</script>
+
 </body>
 </html>
