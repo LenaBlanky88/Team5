@@ -266,8 +266,8 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
   padding:1px 5px;border-radius:var(--r-xs);font-weight:700;}
 .hist-brief{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;}
 .brief-card{background:var(--n0);border:1px solid var(--n100);border-radius:var(--r-md);padding:12px 16px;box-shadow:var(--sh-xs);}
-.brief-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--n400);margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+.brief-hdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--n600);margin-bottom:10px;display:flex;align-items:center;gap:5px;}
 .brief-hdr i{color:var(--p500);}
 .risk-hero{display:flex;align-items:center;gap:16px;}
 .risk-ring{width:72px;height:72px;position:relative;flex-shrink:0;}
@@ -468,8 +468,9 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 .ic-broken-promise{color:var(--n700);}
 .ic-broken-promise::before{content:'';display:inline-block;width:4px;height:4px;
   border-radius:50%;background:var(--err);margin-right:4px;vertical-align:1px;}
-/* CSAT + ESC: red text, no badge */
+/* CSAT: color by score */
 .tl-csat{font-size:10px;padding:0;background:transparent!important;border:none!important;font-weight:600;color:var(--err)!important;}
+.tl-csat.c4,.tl-csat.c5{color:#16a34a!important;}
 .esc-tag{font-size:9px;background:transparent!important;color:var(--err)!important;border:none!important;padding:0;font-weight:600;}
 /* Sentiment emoji visible */
 .tl-foot .sent-ico{display:inline-flex;}
@@ -3657,13 +3658,13 @@ const SL={neutral:'Neutral','slightly-neg':'Slightly Negative',neg:'Negative','v
 const SE={neutral:'😐','slightly-neg':'😕',neg:'😞','very-neg':'😡',pos:'😊'};
 function sentEmoji(s){return SE[s]||'😐';}
 
-/* ── Sentiment indicators — colored dots ── */
+/* ── Sentiment indicators — emoji ── */
 const SENT_SVG={
-  'very-neg':    '<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#dc2626;flex-shrink:0"></span>',
-  'neg':         '<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;flex-shrink:0"></span>',
-  'slightly-neg':'<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#f97316;flex-shrink:0"></span>',
-  'neutral':     '<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#9ca3af;flex-shrink:0"></span>',
-  'pos':         '<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0"></span>',
+  'very-neg':    '<span class="sent-ico" style="font-size:14px;line-height:1">😡</span>',
+  'neg':         '<span class="sent-ico" style="font-size:14px;line-height:1">😞</span>',
+  'slightly-neg':'<span class="sent-ico" style="font-size:14px;line-height:1">😕</span>',
+  'neutral':     '<span class="sent-ico" style="font-size:14px;line-height:1">😐</span>',
+  'pos':         '<span class="sent-ico" style="font-size:14px;line-height:1">🙂</span>',
 };
 function sentIcon(s){return SENT_SVG[s]||SENT_SVG.neutral;}
 
