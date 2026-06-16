@@ -49,7 +49,9 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 .pat-alert.sev-red{background:#fff5f5;border-color:#f5b7b1;border-left-color:#c0392b;}
 .pat-alert.sev-yellow{background:#fffdf0;border-color:#f9e79f;border-left-color:#d4ac0d;}
 .pat-alert:hover{filter:brightness(.97);}
-.pat-alert-icon{font-size:15px;flex-shrink:0;}
+.pat-alert-icon{width:28px;height:28px;border-radius:50%;background:var(--p50);
+  color:var(--p500);display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;}
 .pat-alert-body{flex:1;min-width:0;}
 .pat-alert-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
   color:#922b21;margin-bottom:2px;}
@@ -244,8 +246,10 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 .tl-node{border:1px solid var(--n100);margin-bottom:6px;background:var(--n0);}
 .tl-node:hover{background:var(--n25);border-color:var(--n200);}
 .tl-node.sel{background:var(--p50);border-color:var(--p200);outline:none;}
-.tl-node:not(:last-child)::after{content:'';position:absolute;left:31px;top:60px;
-  width:2px;height:calc(100% - 12px);background:var(--n100);z-index:0;}
+.tl-spine{position:relative;}
+.tl-spine::before{content:'';position:absolute;left:28px;
+  top:var(--spine-top,31px);height:var(--spine-h,0);
+  width:2px;background:var(--n200);z-index:0;pointer-events:none;}
 .tl-ic{width:36px;height:36px;border-radius:50%;border:2px solid var(--n100);
   background:var(--n0);display:flex;align-items:center;justify-content:center;
   font-size:12px;flex-shrink:0;z-index:1;position:relative;}
@@ -304,7 +308,9 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 .pri-critical{background:var(--err-bg);color:var(--err);}
 .pri-high{background:var(--warn-bg);color:#92400e;}
 .pri-medium{background:#fffde7;color:#795b00;}
-.act-txt{font-size:12px;line-height:1.5;color:var(--n700);}
+.act-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 4px;}
+.act-title{font-size:13px;font-weight:600;color:var(--n800);line-height:1.4;}
+.act-txt{font-size:12px;line-height:1.5;color:var(--n500);}
 .act-btn{display:inline-flex;align-items:center;gap:5px;margin-top:6px;
   padding:4px 10px;background:var(--p500);color:#fff;border:none;
   border-radius:var(--r-sm);font-size:10px;font-weight:600;font-family:inherit;
@@ -452,10 +458,10 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 
 /* ── PROFESSIONALISM OVERRIDES ── */
 
-/* Failure pattern count badges: red only for critical, others muted */
-.pat-count{background:var(--n400)!important;font-size:11px;}
+/* Failure pattern count badges: red for critical, orange for high */
+.pat-count{background:#d97706!important;font-size:11px;}
 .pat-count.sev-r{background:var(--err)!important;}
-.pat-count.sev-o{background:var(--n300)!important;}
+.pat-count.sev-o{background:#d97706!important;}
 
 /* Pattern pills in Voice tab: softer, border-only style */
 .pat-pill.sev-r{background:transparent;color:var(--err);border-color:#fca5a5;}
@@ -3741,6 +3747,45 @@ function highlightPatterns(text,allowedTags){
   return out;
 }
 
+/* ── derive short title from action text ── */
+function actionTitle(txt){
+  if(!txt) return '';
+  // Cut at first natural break: em-dash, paren, or conjunction
+  const cutRe=/ — | – |\(| (and|or|—|–)\b/i;
+  const m=txt.search(cutRe);
+  let t=m>0?txt.substring(0,m).trim():txt;
+  t=t.replace(/[—–:,.;]+$/,'').trim();
+
+  const skip=new Set([
+    'the','a','an',
+    'of','with','by','on','in','at','to','for','from','into','via','out',
+    'within','during','across','over','about','after','before',
+    'all','any','single','named','formal','dedicated','full','permanent',
+    'immediate','urgent','further','additional','proactive','personally',
+    'his','her','their','our','its','my','this','that','these','those'
+  ]);
+  const months=new Set(['january','february','march','april','may','june','july',
+    'august','september','october','november','december']);
+
+  const words=t.split(/\s+/).filter(Boolean);
+  const kept=[];
+  for(let i=0;i<words.length;i++){
+    const w=words[i];
+    const lw=w.toLowerCase().replace(/[.,:;]+$/,'');
+    if(i===0){kept.push(w);continue;}                       // always keep leading verb
+    if(/^\$/.test(w)) continue;                              // dollar amounts
+    if(/^\d/.test(w)) continue;                              // numbers / percentages
+    if(/^[A-Z]{2,}-/.test(w)||/^[A-Z]{2,}$/.test(w)) continue; // IDs / acronyms
+    if(/'s$/i.test(w)||/'$/i.test(w)) continue;             // possessives
+    if(skip.has(lw)) continue;
+    if(months.has(lw)) continue;
+    if(/^[A-Z]/.test(w)&&!/^I$/.test(w)) continue;          // mid-sentence proper names
+    kept.push(w);
+    if(kept.length>=3) break;                                // verb + 2 content words
+  }
+  return kept.join(' ');
+}
+
 /* ── action button mapping from verb ── */
 function actionButton(txt){
   const t=(txt||'').toLowerCase();
@@ -3816,7 +3861,7 @@ function renderCallCard(c){
 function renderTabBar(activeTab){
   document.getElementById('tab-bar').innerHTML=`
     <div class="m-tab${activeTab==='voice'?' active':''}" onclick="switchTab('voice')">
-      <i class="fas fa-comment-dots"></i>Chat
+      <i class="fas fa-phone"></i>Voice
     </div>
     <div class="m-tab${activeTab==='history'?' active':''}" onclick="switchTab('history')">
       <i class="fas fa-route"></i>Customer Journey
@@ -3890,7 +3935,7 @@ function renderVoiceTab(c){
       const alrt=document.createElement('div');
       alrt.className='pat-alert sev-'+trig.sev;
       alrt.setAttribute('data-lbl',trig.lbl);
-      alrt.innerHTML='<div class="pat-alert-icon">'+(trig.sev==='red'?'&#128308;':'&#128993;')+'</div>'
+      alrt.innerHTML='<div class="pat-alert-icon"><i class="fas fa-bullseye"></i></div>'
         +'<div class="pat-alert-body">'
           +'<div class="pat-alert-lbl">Pattern Detected &middot; '+trig.lbl+'</div>'
           +'<div class="pat-alert-msg">'+trig.msg+'</div>'
@@ -3949,10 +3994,14 @@ function renderHistoryTab(c){
   }).join('');
   const acts=c.actions.slice(0,3).map((a,i)=>{
     const b=actionButton(a.txt);
+    const title=a.title||actionTitle(a.txt);
     return `<div class="act-item">
       <div class="act-num">${i+1}</div>
       <div class="act-body">
-        <span class="act-pri pri-${a.pri.toLowerCase()}">${a.pri}</span>
+        <div class="act-title-row">
+          ${title?`<span class="act-title">${title}</span>`:''}
+          <span class="act-pri pri-${a.pri.toLowerCase()}">${a.pri}</span>
+        </div>
         <div class="act-txt">${a.txt}</div>
         <button class="act-btn ${b.cls}" id="act-btn-${i}" data-lbl="${b.lbl}" data-idx="${i}"><i class="fas ${b.ic}"></i>${b.lbl}</button>
         <div class="task-card" id="task-card-${i}" style="display:none"></div>
@@ -3969,8 +4018,10 @@ function renderHistoryTab(c){
           ${statusBadge(c.score)}
         </div>
         <div class="flt-bar" id="flt-bar"></div>
-        ${nodes}
-        ${liveIndicator}
+        <div class="tl-spine" id="tl-spine">
+          ${nodes}
+          ${liveIndicator}
+        </div>
       </div>
       <div class="hist-brief">
         <div class="brief-card">
@@ -4014,8 +4065,24 @@ function renderHistoryTab(c){
         createTask(parseInt(this.dataset.idx), this);
       }, {once: true});
     });
+    positionSpineLine();
   });
 }
+
+/* ── continuous timeline spine line ── */
+function positionSpineLine(){
+  const spine=document.getElementById('tl-spine'); if(!spine) return;
+  const ics=spine.querySelectorAll('.tl-node .tl-ic');
+  if(ics.length<2){spine.style.setProperty('--spine-h','0px'); return;}
+  const sRect=spine.getBoundingClientRect();
+  const fRect=ics[0].getBoundingClientRect();
+  const lRect=ics[ics.length-1].getBoundingClientRect();
+  const topY=(fRect.top-sRect.top)+fRect.height/2;
+  const botY=(lRect.top-sRect.top)+lRect.height/2;
+  spine.style.setProperty('--spine-top',topY+'px');
+  spine.style.setProperty('--spine-h',(botY-topY)+'px');
+}
+window.addEventListener('resize',()=>{if(typeof positionSpineLine==='function') positionSpineLine();});
 
 /* ── issue filter ── */
 function toggleIssueFilter(tag){
@@ -4431,10 +4498,8 @@ function renderTaskCard(card, tid, assignee, due, status, progress) {
       scroll.appendChild(e);
       /* ── Pattern alert injection ── */
       var TRIGGERS={
-        1:{lbl:'Repeat Contact',  sev:'yellow',msg:'Customer has contacted 9 times across 4 channels. No single owner identified.'},
-        7:{lbl:'Broken Promise',  sev:'red',  msg:'3 callback commitments logged in agent notes. Zero follow-through on any of them.'},
-        9:{lbl:'SLA Breach',      sev:'red',  msg:'Adjuster decision sat 12 days undelivered. Post-decision SLA breached by 11 days.'},
-        11:{lbl:'Ownership Gap',  sev:'red',  msg:"Decision routed to dead email alias. Customer paying out-of-pocket due to unresolved claim."}
+        1:{lbl:'Repeat Contact', sev:'yellow',msg:'Customer has contacted 9 times across 4 channels. No single owner identified.'},
+        11:{lbl:'Ownership Gap', sev:'red',   msg:"Decision routed to dead email alias. Customer paying out-of-pocket due to unresolved claim."}
       };
       if(TRIGGERS[msgIdx]){
         var trig=TRIGGERS[msgIdx];
@@ -4444,7 +4509,7 @@ function renderTaskCard(card, tid, assignee, due, status, progress) {
           alrt.className='pat-alert sev-'+trig.sev;
           alrt.setAttribute('data-lbl',trig.lbl);
           alrt.innerHTML=
-            '<div class="pat-alert-icon">'+(trig.sev==='red'?'&#128308;':'&#128993;')+'</div>'+
+            '<div class="pat-alert-icon"><i class="fas fa-bullseye"></i></div>'+
             '<div class="pat-alert-body">'+
               '<div class="pat-alert-lbl">Pattern Detected &middot; '+trig.lbl+'</div>'+
               '<div class="pat-alert-msg">'+trig.msg+'</div>'+
