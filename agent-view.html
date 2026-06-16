@@ -461,17 +461,18 @@ body{font-family:'Inter',system-ui,sans-serif;height:100vh;overflow:hidden;
 .pat-pill.sev-r{background:transparent;color:var(--err);border-color:#fca5a5;}
 .pat-pill.sev-o{background:transparent;color:#92400e;border-color:#fcd34d;}
 
-/* Issue chips in timeline: all neutral grey, broken-promise gets a red dot via ::before */
-.issue-chip{font-weight:500;background:var(--n50);color:var(--n500);border-color:var(--n200);}
-.ic-broken-promise{background:var(--n50);color:var(--n700);border-color:var(--n200);font-weight:500;}
-.ic-broken-promise::before{background:var(--err)!important;}
-.ic-broken-promise::before{content:'';display:inline-block;width:5px;height:5px;
+/* Issue chips — all neutral, no color noise */
+.issue-chip{font-weight:500;background:var(--n50);color:var(--n500);border:1px solid var(--n150);padding:2px 8px;font-size:10px;}
+.ic-broken-promise,.ic-sla-breach,.ic-ownership-gap,.ic-repeat-contact,.ic-routing-failure,.ic-inconsistent-information{
+  background:var(--n50);color:var(--n500);border-color:var(--n150);}
+.ic-broken-promise{color:var(--n700);}
+.ic-broken-promise::before{content:'';display:inline-block;width:4px;height:4px;
   border-radius:50%;background:var(--err);margin-right:4px;vertical-align:1px;}
-.ic-sla-breach{background:var(--n50);color:var(--n500);border-color:var(--n200);}
-.ic-ownership-gap{background:var(--n50);color:var(--n500);border-color:var(--n200);}
-.ic-repeat-contact{background:var(--n50);color:var(--n500);border-color:var(--n200);}
-.ic-routing-failure{background:var(--n50);color:var(--n500);border-color:var(--n200);}
-.ic-inconsistent-information{background:var(--n50);color:var(--n500);border-color:var(--n200);}
+/* CSAT + ESC: red text, no badge */
+.tl-csat{font-size:10px;padding:0;background:transparent!important;border:none!important;font-weight:600;color:var(--err)!important;}
+.esc-tag{font-size:9px;background:transparent!important;color:var(--err)!important;border:none!important;padding:0;font-weight:600;}
+/* Sentiment emoji visible */
+.tl-foot .sent-ico{display:inline-flex;}
 
 /* ── TASK AUTOMATION CARDS ── */
 .task-card{margin-top:8px;border:1px solid var(--n100);border-radius:var(--r-md);
@@ -3656,13 +3657,13 @@ const SL={neutral:'Neutral','slightly-neg':'Slightly Negative',neg:'Negative','v
 const SE={neutral:'😐','slightly-neg':'😕',neg:'😞','very-neg':'😡',pos:'😊'};
 function sentEmoji(s){return SE[s]||'😐';}
 
-/* ── Sentiment icons (from Figma — Sentiments Icon set) ── */
+/* ── Sentiment indicators — colored dots ── */
 const SENT_SVG={
-  'very-neg':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Strongly Negative"><rect width="32" height="32" rx="6" fill="#BD2A2A"/><circle cx="16" cy="16" r="9" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M11 12.8 L14 13.8 M21 12.8 L18 13.8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M11.5 20 Q16 16.4 20.5 20" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
-  'neg':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Negative"><rect width="32" height="32" rx="6" fill="#FFB8B8"/><circle cx="16" cy="16" r="9" fill="none" stroke="#3a0f0f" stroke-width="1.6" stroke-opacity=".8"/><circle cx="13.2" cy="13.3" r="1.3" fill="#3a0f0f" fill-opacity=".8"/><circle cx="18.8" cy="13.3" r="1.3" fill="#3a0f0f" fill-opacity=".8"/><path d="M11.5 19.5 Q16 15.9 20.5 19.5" stroke="#3a0f0f" stroke-opacity=".8" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>`,
-  'slightly-neg':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Slightly Negative"><rect width="32" height="32" rx="6" fill="#FFD8D8"/><circle cx="16" cy="16" r="9" fill="none" stroke="#3a0f0f" stroke-width="1.6" stroke-opacity=".7"/><circle cx="13.2" cy="13.3" r="1.3" fill="#3a0f0f" fill-opacity=".75"/><circle cx="18.8" cy="13.3" r="1.3" fill="#3a0f0f" fill-opacity=".75"/><path d="M11.8 19 Q16 17.2 20.2 19" stroke="#3a0f0f" stroke-opacity=".75" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>`,
-  'neutral':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Neutral"><rect width="32" height="32" rx="6" fill="#E5E7EB"/><circle cx="16" cy="16" r="9" fill="none" stroke="#4b5563" stroke-width="1.6"/><circle cx="13.2" cy="13.5" r="1.3" fill="#4b5563"/><circle cx="18.8" cy="13.5" r="1.3" fill="#4b5563"/><line x1="12" y1="19" x2="20" y2="19" stroke="#4b5563" stroke-width="1.8" stroke-linecap="round"/></svg>`,
-  'pos':`<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" class="sent-ico" aria-label="Strongly Positive"><rect width="32" height="32" rx="6" fill="#126BCE"/><circle cx="16" cy="16" r="9" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="13.2" cy="13.3" r="1.4" fill="#fff"/><circle cx="18.8" cy="13.3" r="1.4" fill="#fff"/><path d="M11.5 16.8 Q16 21.4 20.5 16.8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`
+  'very-neg':    '<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#dc2626;flex-shrink:0"></span>',
+  'neg':         '<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;flex-shrink:0"></span>',
+  'slightly-neg':'<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#f97316;flex-shrink:0"></span>',
+  'neutral':     '<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#9ca3af;flex-shrink:0"></span>',
+  'pos':         '<span class="sent-ico" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#16a34a;flex-shrink:0"></span>',
 };
 function sentIcon(s){return SENT_SVG[s]||SENT_SVG.neutral;}
 
